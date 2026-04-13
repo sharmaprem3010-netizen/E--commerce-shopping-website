@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bazario — Next-Gen Shopping</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#071a0e;--bg1:#0c3018;--bg2:#113820;--bg3:#1a4f2e;
+  --glass:rgba(15,45,25,0.55);--glass2:rgba(20,55,30,0.7);
+  --line:rgba(255,255,255,0.12);--line2:rgba(255,255,255,0.22);
+  --ink:#e8f5ec;--muted:rgba(200,235,210,0.6);
+  --coral:#ef5b3f;--coral2:#d9472b;--coral3:rgba(239,91,63,0.15);
+  --gold:#f0c040;--gold2:rgba(240,192,64,0.15);
+  --teal:#34d399;--teal2:rgba(52,211,153,0.15);
+  --accent:#2f7b43;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Manrope',sans-serif;background:var(--bg0);color:var(--ink);min-height:100vh;overflow-x:hidden;}
+.font-display{font-family:'Outfit',sans-serif;}
+.glass{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);}
+.glass2{background:var(--glass2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--line2);}
+.bg-radial{background:radial-gradient(ellipse at 60% 30%,rgba(47,123,67,0.35) 0%,transparent 65%),radial-gradient(ellipse at 10% 80%,rgba(52,211,153,0.08) 0%,transparent 50%),linear-gradient(160deg,var(--bg0) 0%,var(--bg1) 40%,var(--bg2) 100%);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--bg1);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:4px;}
+
+/* ── PAGE SYSTEM ── */
+.page{display:none;min-height:100vh;padding-top:80px;}
+.page.active{display:block;}
+
+/* ── NAVBAR ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:80px;padding:0 2rem;display:flex;align-items:center;justify-content:space-between;background:rgba(7,26,14,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--line);}
+.nav-logo{font-family:'Outfit',sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:-0.03em;cursor:pointer;}
+.nav-logo span{color:var(--coral);}
+.nav-links{display:flex;gap:2rem;font-size:.85rem;font-weight:600;letter-spacing:.04em;}
+.nav-links a{opacity:.65;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.08em;}
+.nav-links a:hover,.nav-links a.active{opacity:1;color:var(--coral);}
+.nav-actions{display:flex;align-items:center;gap:1rem;}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;border:1px solid var(--line);background:var(--glass);font-size:1.1rem;}
+.icon-btn:hover{background:var(--glass2);border-color:var(--line2);}
+.cart-badge{position:relative;}
+.cart-badge .badge{position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:var(--coral);border-radius:50%;font-size:.65rem;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;}
+.search-bar{flex:1;max-width:380px;margin:0 2rem;position:relative;}
+.search-bar input{width:100%;background:var(--glass);border:1px solid var(--line);border-radius:50px;padding:.6rem 1.2rem .6rem 2.8rem;font-size:.85rem;color:var(--ink);font-family:'Manrope',sans-serif;outline:none;transition:all .2s;}
+.search-bar input:focus{border-color:var(--line2);background:var(--glass2);}
+.search-bar input::placeholder{color:var(--muted);}
+.search-icon{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);opacity:.5;font-size:.9rem;}
+
+/* ── BUTTONS ── */
+.btn-coral{background:var(--coral);color:#fff;border:none;border-radius:50px;padding:.75rem 1.8rem;font-family:'Outfit',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.08em;cursor:pointer;transition:all .25s;text-transform:uppercase;}
+.btn-coral:hover{background:var(--coral2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(239,91,63,0.35);}
+.btn-outline{background:transparent;color:var(--ink);border:1px solid var(--line2);border-radius:50px;padding:.75rem 1.8rem;font-family:'Outfit',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.08em;cursor:pointer;transition:all .25s;text-transform:uppercase;}
+.btn-outline:hover{background:var(--glass2);border-color:var(--teal);color:var(--teal);}
+.btn-gold{background:var(--gold);color:#111;border:none;border-radius:50px;padding:.75rem 1.8rem;font-family:'Outfit',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.08em;cursor:pointer;transition:all .25s;text-transform:uppercase;}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(240,192,64,0.4);}
+.btn-teal{background:var(--teal);color:#071a0e;border:none;border-radius:50px;padding:.75rem 1.8rem;font-family:'Outfit',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.08em;cursor:pointer;transition:all .25s;text-transform:uppercase;}
+.btn-teal:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(52,211,153,0.35);}
+.btn-sm{padding:.45rem 1rem;font-size:.75rem;}
+
+/* ── HERO ── */
+.hero{min-height:calc(100vh - 80px);display:flex;align-items:center;position:relative;overflow:hidden;padding:4rem 4rem 2rem;}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+.hero-orb.o1{width:600px;height:600px;background:rgba(47,123,67,0.22);top:-100px;right:-100px;}
+.hero-orb.o2{width:400px;height:400px;background:rgba(52,211,153,0.08);bottom:-50px;left:30%;}
+.hero-orb.o3{width:300px;height:300px;background:rgba(239,91,63,0.06);top:30%;left:-80px;}
+
+/* ── MOOD SELECTOR ── */
+.mood-pill{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.2rem;border-radius:50px;border:1px solid var(--line);background:var(--glass);cursor:pointer;transition:all .2s;font-size:.82rem;font-weight:600;white-space:nowrap;}
+.mood-pill:hover{border-color:var(--line2);background:var(--glass2);}
+.mood-pill.active{border-color:var(--coral);background:var(--coral3);color:var(--coral);}
+
+/* ── PRODUCT CARDS ── */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem;}
+.product-card{border-radius:1.5rem;overflow:hidden;cursor:pointer;transition:all .3s;position:relative;background:var(--glass);border:1px solid var(--line);}
+.product-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,0.4);border-color:var(--line2);}
+.product-card-img{width:100%;height:220px;object-fit:cover;display:block;transition:transform .4s;}
+.product-card:hover .product-card-img{transform:scale(1.04);}
+.product-card-body{padding:1.2rem;}
+.eco-badge{position:absolute;top:.8rem;left:.8rem;padding:.25rem .65rem;border-radius:50px;font-size:.7rem;font-weight:800;font-family:'Outfit',sans-serif;letter-spacing:.05em;}
+.eco-A{background:rgba(52,211,153,0.25);color:#34d399;border:1px solid rgba(52,211,153,0.3);}
+.eco-B{background:rgba(132,204,22,0.25);color:#a3e635;border:1px solid rgba(132,204,22,0.3);}
+.eco-C{background:rgba(250,204,21,0.25);color:#fbbf24;border:1px solid rgba(250,204,21,0.3);}
+.eco-D{background:rgba(249,115,22,0.25);color:#fb923c;border:1px solid rgba(249,115,22,0.3);}
+.eco-E{background:rgba(239,68,68,0.25);color:#f87171;border:1px solid rgba(239,68,68,0.3);}
+.top-badge{position:absolute;top:.8rem;right:.8rem;padding:.25rem .65rem;border-radius:50px;font-size:.68rem;font-weight:800;font-family:'Outfit',sans-serif;letter-spacing:.05em;}
+.badge-coral{background:var(--coral3);color:var(--coral);border:1px solid rgba(239,91,63,0.3);}
+.badge-gold{background:var(--gold2);color:var(--gold);border:1px solid rgba(240,192,64,0.3);}
+.badge-teal{background:var(--teal2);color:var(--teal);border:1px solid rgba(52,211,153,0.3);}
+.stars{color:var(--gold);font-size:.85rem;}
+.price-old{text-decoration:line-through;opacity:.4;font-size:.8rem;}
+.discount-pct{background:var(--coral3);color:var(--coral);font-size:.72rem;font-weight:800;padding:.15rem .5rem;border-radius:4px;font-family:'Outfit',sans-serif;}
+
+/* ── SECTION LABELS ── */
+.section-label{font-size:.7rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--coral);margin-bottom:.5rem;}
+.section-title{font-family:'Outfit',sans-serif;font-size:2.2rem;font-weight:800;letter-spacing:-.03em;line-height:1.1;}
+
+/* ── FEATURE STRIPS ── */
+.feature-chip{display:flex;align-items:center;gap:.75rem;padding:1rem 1.5rem;border-radius:1rem;border:1px solid var(--line);background:var(--glass);flex:1;min-width:160px;}
+
+/* ── GROUPBUY BAR ── */
+.groupbuy-bar-track{height:8px;background:rgba(255,255,255,0.08);border-radius:50px;overflow:hidden;}
+.groupbuy-bar-fill{height:100%;background:linear-gradient(90deg,var(--teal),#22c55e);border-radius:50px;transition:width .5s ease;}
+
+/* ── BID FLASH ── */
+.bid-timer{font-family:'Outfit',sans-serif;font-size:3rem;font-weight:900;color:var(--coral);letter-spacing:-.04em;line-height:1;}
+.bid-price{font-family:'Outfit',sans-serif;font-size:2.5rem;font-weight:900;color:var(--gold);}
+
+/* ── SPIN WHEEL ── */
+.wheel-wrap{position:relative;width:280px;height:280px;margin:0 auto;}
+.wheel{width:280px;height:280px;border-radius:50%;border:4px solid var(--line2);position:relative;transition:transform 4s cubic-bezier(.17,.67,.12,.99);overflow:hidden;}
+.wheel-segment{position:absolute;width:0;height:0;top:50%;left:50%;transform-origin:0 0;}
+.wheel-center{position:absolute;width:40px;height:40px;background:var(--bg0);border:4px solid var(--line2);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.wheel-pointer{position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:22px solid var(--coral);z-index:11;}
+.wheel-label{position:absolute;font-size:.55rem;font-weight:800;font-family:'Outfit',sans-serif;letter-spacing:.04em;color:#fff;text-align:center;width:50px;transform-origin:center bottom;}
+
+/* ── PRICE CHART ── */
+.price-chart{height:80px;position:relative;}
+.price-chart svg{width:100%;height:100%;}
+
+/* ── CART ── */
+.cart-item{display:flex;gap:1rem;padding:1rem;border-radius:1rem;background:var(--glass);border:1px solid var(--line);transition:all .2s;}
+.cart-item:hover{border-color:var(--line2);}
+.cart-item img{width:80px;height:80px;object-fit:cover;border-radius:.75rem;flex-shrink:0;}
+.qty-control{display:flex;align-items:center;gap:.5rem;}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--line2);background:var(--glass);cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;transition:all .2s;}
+.qty-btn:hover{background:var(--glass2);border-color:var(--teal);}
+
+/* ── TOAST ── */
+.toast-container{position:fixed;top:90px;right:1.5rem;z-index:200;display:flex;flex-direction:column;gap:.6rem;}
+.toast{padding:.85rem 1.4rem;border-radius:.85rem;font-size:.82rem;font-weight:600;backdrop-filter:blur(16px);border:1px solid var(--line2);animation:slideIn .3s ease;max-width:280px;}
+.toast-success{background:rgba(52,211,153,0.2);border-color:rgba(52,211,153,0.4);color:var(--teal);}
+.toast-error{background:rgba(239,91,63,0.2);border-color:rgba(239,91,63,0.4);color:var(--coral);}
+.toast-info{background:rgba(240,192,64,0.2);border-color:rgba(240,192,64,0.4);color:var(--gold);}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:150;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
+.modal-box{background:var(--bg2);border:1px solid var(--line2);border-radius:1.8rem;padding:2rem;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;position:relative;}
+.modal-close{position:absolute;top:1rem;right:1rem;width:32px;height:32px;border-radius:50%;background:var(--glass);border:1px solid var(--line);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;opacity:.7;}
+.modal-close:hover{opacity:1;}
+
+/* ── FORM ── */
+.form-group{margin-bottom:1rem;}
+.form-label{display:block;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.4rem;opacity:.7;}
+.form-input{width:100%;background:var(--glass);border:1px solid var(--line);border-radius:.75rem;padding:.75rem 1rem;font-size:.88rem;color:var(--ink);font-family:'Manrope',sans-serif;outline:none;transition:all .2s;}
+.form-input:focus{border-color:var(--teal);background:var(--glass2);}
+.form-input::placeholder{color:var(--muted);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+
+/* ── MYSTERY BOX ── */
+.mystery-box{border-radius:1.5rem;border:1px solid var(--line);background:var(--glass);padding:2rem;text-align:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;}
+.mystery-box:hover{transform:translateY(-8px);border-color:var(--line2);box-shadow:0 24px 60px rgba(0,0,0,.4);}
+.mystery-box::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,var(--glow,rgba(239,91,63,.1)) 0%,transparent 70%);pointer-events:none;}
+.mystery-glow-gold::before{--glow:rgba(240,192,64,.12);}
+.mystery-glow-teal::before{--glow:rgba(52,211,153,.12);}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes spinBox{0%{transform:rotateY(0deg)}100%{transform:rotateY(720deg)}}
+.anim-fade{animation:fadeUp .5s ease both;}
+.anim-delay-1{animation-delay:.1s;}
+.anim-delay-2{animation-delay:.2s;}
+.anim-delay-3{animation-delay:.3s;}
+.pulse{animation:pulse 2s infinite;}
+
+/* ── VOICE ── */
+.voice-btn.listening{border-color:var(--coral);background:var(--coral3);animation:pulse 1s infinite;}
+.voice-transcript{background:var(--glass2);border:1px solid var(--line2);border-radius:.75rem;padding:.6rem 1rem;font-size:.8rem;font-style:italic;color:var(--muted);margin-top:.5rem;min-height:36px;}
+
+/* ── FOOTER ── */
+footer{background:var(--bg1);border-top:1px solid var(--line);padding:3rem 4rem;margin-top:4rem;}
+
+/* ── MISC ── */
+.tag{display:inline-block;padding:.2rem .6rem;border-radius:.3rem;font-size:.68rem;font-weight:700;letter-spacing:.05em;font-family:'Outfit',sans-serif;}
+.divider{height:1px;background:var(--line);margin:1.5rem 0;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;font-size:.88rem;}
+.summary-total{font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:800;}
+.order-card{border-radius:1.2rem;background:var(--glass);border:1px solid var(--line);padding:1.5rem;margin-bottom:1rem;}
+
+/* ── SIDE CATEGORIES ── */
+.cat-sidebar{position:sticky;top:90px;}
+.cat-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:.75rem;cursor:pointer;transition:all .2s;font-size:.85rem;font-weight:600;border:1px solid transparent;}
+.cat-item:hover,.cat-item.active{background:var(--glass2);border-color:var(--line2);}
+.cat-item.active{color:var(--coral);}
+
+/* â”€â”€ PROFILE â”€â”€ */
+.profile-shell{display:grid;grid-template-columns:300px minmax(0,1fr);gap:1.5rem;align-items:start;}
+.profile-sidebar,.profile-main{border-radius:1.6rem;padding:1.3rem;}
+.profile-sticky{position:sticky;top:100px;}
+.profile-user-card{display:flex;align-items:center;gap:1rem;padding:1rem 1.1rem;border-radius:1.2rem;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-bottom:1rem;}
+.profile-avatar{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--coral));color:#071a0e;box-shadow:0 10px 24px rgba(239,91,63,.25);}
+.profile-sidebar-group{padding:.9rem 0;border-top:1px solid rgba(255,255,255,.07);}
+.profile-sidebar-group:first-of-type{border-top:none;padding-top:0;}
+.profile-sidebar-title{font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem;}
+.profile-nav-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.8rem .95rem;border-radius:.95rem;border:1px solid transparent;background:transparent;color:var(--ink);cursor:pointer;font-family:'Manrope',sans-serif;font-size:.88rem;font-weight:700;transition:all .2s;text-align:left;}
+.profile-nav-btn:hover,.profile-nav-btn.active{background:var(--glass2);border-color:var(--line2);}
+.profile-nav-btn.active{color:var(--coral);}
+.profile-nav-btn span{display:flex;align-items:center;gap:.7rem;}
+.profile-head{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start;margin-bottom:1.4rem;}
+.profile-title{font-family:'Outfit',sans-serif;font-size:2rem;font-weight:800;letter-spacing:-.03em;}
+.profile-subtitle{opacity:.58;font-size:.88rem;max-width:540px;line-height:1.7;}
+.profile-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin:1.25rem 0 1.5rem;}
+.profile-stat-card{border-radius:1.2rem;padding:1rem 1.1rem;background:rgba(255,255,255,.04);border:1px solid var(--line);}
+.profile-stat-label{font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.45rem;}
+.profile-stat-value{font-family:'Outfit',sans-serif;font-size:1.5rem;font-weight:800;line-height:1;}
+.profile-section-card{border-radius:1.3rem;padding:1.4rem;background:rgba(255,255,255,.04);border:1px solid var(--line);margin-bottom:1rem;}
+.profile-section-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;}
+.profile-section-title{font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:800;}
+.profile-action-link{background:none;border:none;color:var(--coral);font-family:'Outfit',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+.profile-action-link:hover{color:var(--gold);}
+.profile-grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;}
+.profile-radio-row{display:flex;gap:1rem;flex-wrap:wrap;}
+.profile-radio-pill{display:inline-flex;align-items:center;gap:.45rem;padding:.7rem 1rem;border-radius:999px;border:1px solid var(--line);background:var(--glass);cursor:pointer;font-size:.86rem;font-weight:600;}
+.profile-radio-pill input{accent-color:var(--coral);}
+.profile-form-actions{display:flex;justify-content:flex-end;gap:.8rem;margin-top:.4rem;flex-wrap:wrap;}
+.profile-badge{display:inline-flex;align-items:center;gap:.45rem;padding:.28rem .75rem;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
+.profile-badge-success{background:var(--teal2);color:var(--teal);border:1px solid rgba(52,211,153,.28);}
+.profile-badge-muted{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line);}
+.profile-stack{display:flex;flex-direction:column;gap:1rem;}
+.profile-address-card,.profile-payment-card,.profile-coupon-card{border-radius:1.15rem;padding:1rem 1.05rem;background:rgba(255,255,255,.035);border:1px solid var(--line);}
+.profile-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.7rem;}
+.profile-card-actions{display:flex;gap:.6rem;flex-wrap:wrap;}
+.profile-plain-btn{background:transparent;border:1px solid var(--line2);color:var(--ink);border-radius:999px;padding:.4rem .85rem;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.profile-plain-btn:hover{border-color:var(--teal);color:var(--teal);background:rgba(52,211,153,.08);}
+.profile-list{display:flex;flex-direction:column;gap:.8rem;}
+.profile-empty{padding:2rem 1.25rem;border-radius:1.1rem;border:1px dashed var(--line2);text-align:center;opacity:.78;}
+.profile-compact-text{font-size:.82rem;opacity:.65;line-height:1.7;}
+.profile-order-list{display:flex;flex-direction:column;gap:1rem;}
+.profile-order-item{border-radius:1.15rem;padding:1rem 1.05rem;background:rgba(255,255,255,.035);border:1px solid var(--line);}
+.profile-order-media{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.8rem;}
+.profile-order-media img{width:52px;height:52px;border-radius:.75rem;object-fit:cover;}
+.profile-note{border-radius:1rem;padding:.9rem 1rem;background:var(--gold2);border:1px solid rgba(240,192,64,.22);font-size:.82rem;color:#f8e2a2;}
+.profile-logout{width:100%;margin-top:.8rem;}
+
+@media (max-width:1080px){
+  .profile-shell{grid-template-columns:1fr;}
+  .profile-sticky{position:static;}
+}
+
+@media (max-width:760px){
+  nav{padding:0 1rem;}
+  .search-bar{display:none;}
+  .page{padding-top:86px;}
+  .hero,footer,#page-products > div,#page-groupbuy > div,#page-mystery > div,#page-orders > div,#page-checkout > div,#page-profile > div{padding-left:1rem !important;padding-right:1rem !important;}
+  .profile-grid-2,.profile-stat-grid{grid-template-columns:1fr;}
+  .profile-head{flex-direction:column;}
+}
+</style>
+</head>
+<body class="bg-radial">
+
+<!-- ══════════ NAVBAR ══════════ -->
+<nav id="navbar">
+  <div class="nav-logo" onclick="goTo('home')">BAZ<span>ARIO</span></div>
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search products, brands, categories..." oninput="handleSearch(this.value)">
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a onclick="goTo('home')" class="active" data-page="home">Home</a>
+    <a onclick="goTo('products')" data-page="products">Shop</a>
+    <a onclick="goTo('groupbuy')" data-page="groupbuy">GroupBuy</a>
+    <a onclick="goTo('mystery')" data-page="mystery">Mystery</a>
+    <a onclick="goTo('orders')" data-page="orders">Orders</a>
+    <a onclick="handleUserAction()" data-page="profile">My Profile</a>
+  </div>
+  <div class="nav-actions">
+    <div class="icon-btn voice-btn" id="voiceBtn" onclick="toggleVoice()" title="VoiceShop™">🎙️</div>
+    <div class="icon-btn" onclick="handleUserAction()" title="Login" id="userIcon">👤</div>
+    <div class="icon-btn cart-badge" onclick="goTo('cart')" title="Cart">
+      🛒<span class="badge" id="cartBadge">0</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════ TOAST CONTAINER ══════════ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══════════ HOME PAGE ══════════ -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-orb o1"></div>
+    <div class="hero-orb o2"></div>
+    <div class="hero-orb o3"></div>
+    <div style="flex:1;max-width:580px;z-index:1;">
+      <div class="section-label anim-fade">🚀 Next-Gen Shopping Platform</div>
+      <h1 class="font-display anim-fade anim-delay-1" style="font-size:clamp(3rem,6vw,5.5rem);font-weight:900;letter-spacing:-.04em;line-height:1;margin-bottom:1.2rem;">SHOP<br><span style="color:var(--coral)">SMARTER</span><br>LIVE BETTER</h1>
+      <p class="anim-fade anim-delay-2" style="opacity:.75;font-size:1rem;line-height:1.7;max-width:420px;margin-bottom:2rem;">The only shopping platform with MoodCart, BidFlash auctions, GroupBuy deals, and a SpinDeal wheel. <strong>10 features no other store has.</strong></p>
+      <div class="anim-fade anim-delay-3" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;">
+        <button class="btn-coral" onclick="goTo('products')">SHOP NOW →</button>
+        <button class="btn-outline" onclick="goTo('mystery')">📦 Mystery Box</button>
+      </div>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;padding:.8rem 1.2rem;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:1rem;width:fit-content;">
+        <span style="font-size:.78rem;font-weight:600;opacity:.7;">🚚 Free shipping above ₹499</span>
+        <span style="opacity:.3;">|</span>
+        <span style="font-size:.78rem;font-weight:600;opacity:.7;">🔒 Razorpay Secured</span>
+        <span style="opacity:.3;">|</span>
+        <span style="font-size:.78rem;font-weight:600;opacity:.7;">🌿 EcoScore on every product</span>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;justify-content:center;align-items:center;z-index:1;padding-left:3rem;">
+      <div style="position:relative;">
+        <div class="glass2" style="border-radius:2rem;padding:.75rem;max-width:420px;">
+          <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80" style="border-radius:1.5rem;width:100%;max-height:480px;object-fit:cover;" alt="Shopping">
+        </div>
+        <div class="glass2" style="position:absolute;bottom:-1.5rem;left:-2rem;border-radius:1rem;padding:1rem 1.4rem;box-shadow:0 16px 40px rgba(0,0,0,.4);">
+          <div style="font-size:.65rem;opacity:.6;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.2rem;">⚡ BidFlash Deal</div>
+          <div class="font-display" style="font-weight:800;font-size:.95rem;">Sony WH-1000XM5</div>
+          <div style="display:flex;align-items:center;gap:.5rem;margin-top:.2rem;">
+            <span class="font-display" style="font-weight:900;color:var(--gold);font-size:1.1rem;">₹17,999</span>
+            <span style="text-decoration:line-through;opacity:.4;font-size:.8rem;">₹34,990</span>
+          </div>
+        </div>
+        <div class="glass2" style="position:absolute;top:-1rem;right:-2rem;border-radius:1rem;padding:.8rem 1rem;text-align:center;">
+          <div style="font-size:1.4rem;">🎭</div>
+          <div style="font-size:.65rem;opacity:.6;text-transform:uppercase;letter-spacing:.08em;margin-top:.2rem;">MoodCart™</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOOD CART -->
+  <section style="padding:3rem 4rem;">
+    <div class="section-label">🎭 MoodCart™ — Exclusive to Bazario</div>
+    <h2 class="section-title" style="margin-bottom:.5rem;">How are you feeling today?</h2>
+    <p style="opacity:.6;font-size:.9rem;margin-bottom:1.5rem;">Select your mood and we'll show you the perfect products.</p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;" id="moodSelector">
+      <div class="mood-pill active" onclick="setMood('all',this)" data-mood="all">✨ Show All</div>
+      <div class="mood-pill" onclick="setMood('Treating Myself',this)" data-mood="Treating Myself">🎁 Treating Myself</div>
+      <div class="mood-pill" onclick="setMood('Feeling Productive',this)" data-mood="Feeling Productive">💼 Feeling Productive</div>
+      <div class="mood-pill" onclick="setMood('Bored at Home',this)" data-mood="Bored at Home">😴 Bored at Home</div>
+      <div class="mood-pill" onclick="setMood('Need a Gift',this)" data-mood="Need a Gift">🎂 Need a Gift</div>
+      <div class="mood-pill" onclick="setMood('Celebrating',this)" data-mood="Celebrating">🎉 Celebrating</div>
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS HOME -->
+  <section style="padding:0 4rem 4rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+      <div>
+        <div class="section-label">🔥 Featured</div>
+        <h2 class="section-title" id="featuredTitle">Today's Top Picks</h2>
+      </div>
+      <button class="btn-outline btn-sm" onclick="goTo('products')">View All →</button>
+    </div>
+    <div class="product-grid" id="homeProductGrid"></div>
+  </section>
+
+  <!-- FEATURE HIGHLIGHTS -->
+  <section style="padding:2rem 4rem 4rem;">
+    <div class="section-label" style="text-align:center;">Why Bazario?</div>
+    <h2 class="section-title" style="text-align:center;margin-bottom:2rem;">10 Features No Other Store Has</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
+      <div class="feature-chip glass"><span style="font-size:1.4rem;">🎭</span><div><div style="font-weight:800;font-size:.85rem;font-family:'Outfit',sans-serif;">MoodCart™</div><div style="font-size:.72rem;opacity:.6;">Shop by mood</div></div></div>
+      <div class="feature-chip glass"><span style="font-size:1.4rem;">👥</span><div><div style="font-weight:800;font-size:.85rem;font-family:'Outfit',sans-serif;">GroupBuy™</div><div style="font-size:.72rem;opacity:.6;">Join & save together</div></div></div>
+      <div class="feature-chip glass"><span style="font-size:1.4rem;">⚡</span><div><div style="font-weight:800;font-size:.85rem;font-family:'Outfit',sans-serif;">BidFlash™</div><div style="font-size:.72rem;opacity:.6;">60-sec auctions</div></div></div>
+      <div class="feature-chip glass"><span style="font-size:1.4rem;">🎰</span><div><div style="font-weight:800;font-size:.85rem;font-family:'Outfit',sans-serif;">SpinDeal™</div><div style="font-size:.72rem;opacity:.6;">Spin to win</div></div></div>
+      <div class="feature-chip glass"><span style="font-size:1.4rem;">📈</span><div><div style="font-weight:800;font-size:.85rem;font-family:'Outfit',sans-serif;">PriceTimeline™</div><div style="font-size:.72rem;opacity:.6;">30-day history</div></div></div>
+      <div class="feature-chip glass"><span style="font-size:1.4rem;">🌿</span><div><div style="font-weight:800;font-size:.85rem;font-family:'Outfit',sans-serif;">EcoScore™</div><div style="font-size:.72rem;opacity:.6;">Planet impact</div></div></div>
+      <div class="feature-chip glass"><span style="font-size:1.4rem;">🧠</span><div><div style="font-weight:800;font-size:.85rem;font-family:'Outfit',sans-serif;">BundleAI™</div><div style="font-size:.72rem;opacity:.6;">Smart combos</div></div></div>
+      <div class="feature-chip glass"><span style="font-size:1.4rem;">🔗</span><div><div style="font-weight:800;font-size:.85rem;font-family:'Outfit',sans-serif;">SocialCart™</div><div style="font-size:.72rem;opacity:.6;">Friends vote</div></div></div>
+      <div class="feature-chip glass"><span style="font-size:1.4rem;">📦</span><div><div style="font-weight:800;font-size:.85rem;font-family:'Outfit',sans-serif;">MysteryBox™</div><div style="font-size:.72rem;opacity:.6;">Surprise deals</div></div></div>
+      <div class="feature-chip glass"><span style="font-size:1.4rem;">🎙️</span><div><div style="font-weight:800;font-size:.85rem;font-family:'Outfit',sans-serif;">VoiceShop™</div><div style="font-size:.72rem;opacity:.6;">Hands-free shop</div></div></div>
+    </div>
+  </section>
+</div>
+
+<!-- ══════════ PRODUCTS PAGE ══════════ -->
+<div class="page" id="page-products">
+  <div style="display:flex;gap:2rem;padding:2rem 4rem;">
+    <!-- SIDEBAR -->
+    <div style="width:220px;flex-shrink:0;">
+      <div class="cat-sidebar">
+        <div style="font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.5;margin-bottom:.75rem;">Categories</div>
+        <div class="cat-item active" onclick="filterCat('All',this)"><span>🛍️</span> All Products</div>
+        <div class="cat-item" onclick="filterCat('Electronics',this)"><span>⚡</span> Electronics</div>
+        <div class="cat-item" onclick="filterCat('Clothing',this)"><span>👗</span> Clothing</div>
+        <div class="cat-item" onclick="filterCat('Home',this)"><span>🏠</span> Home & Living</div>
+        <div class="cat-item" onclick="filterCat('Sports',this)"><span>🏃</span> Sports</div>
+        <div class="cat-item" onclick="filterCat('Beauty',this)"><span>✨</span> Beauty</div>
+        <div class="cat-item" onclick="filterCat('Books',this)"><span>📚</span> Books</div>
+        <div class="divider"></div>
+        <div style="font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.5;margin-bottom:.75rem;">EcoScore Filter</div>
+        <div class="cat-item" onclick="filterEco('all',this)"><span class="eco-badge eco-A" style="position:static;">A</span> Grade A only</div>
+        <div class="cat-item" onclick="filterEco('AB',this)"><span>🌿</span> A & B Grades</div>
+        <div class="divider"></div>
+        <div style="font-size:.7rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.5;margin-bottom:.75rem;">Sort By</div>
+        <select id="sortSelect" onchange="sortProducts(this.value)" style="width:100%;background:var(--glass);border:1px solid var(--line);border-radius:.75rem;padding:.6rem .9rem;color:var(--ink);font-family:'Manrope',sans-serif;font-size:.82rem;outline:none;cursor:pointer;">
+          <option value="default">Default</option>
+          <option value="low">Price: Low to High</option>
+          <option value="high">Price: High to Low</option>
+          <option value="rating">Highest Rated</option>
+          <option value="eco">Best EcoScore</option>
+        </select>
+      </div>
+    </div>
+    <!-- GRID -->
+    <div style="flex:1;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div>
+          <h2 class="section-title" id="productsTitle">All Products</h2>
+          <div style="font-size:.82rem;opacity:.5;" id="productsCount"></div>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <span style="font-size:.78rem;opacity:.5;">Mood:</span>
+          <select id="moodFilter" onchange="filterMood(this.value)" style="background:var(--glass);border:1px solid var(--line);border-radius:50px;padding:.4rem .9rem;color:var(--ink);font-family:'Manrope',sans-serif;font-size:.78rem;outline:none;cursor:pointer;">
+            <option value="all">All Moods</option>
+            <option value="Treating Myself">🎁 Treating Myself</option>
+            <option value="Feeling Productive">💼 Feeling Productive</option>
+            <option value="Bored at Home">😴 Bored at Home</option>
+            <option value="Need a Gift">🎂 Need a Gift</option>
+            <option value="Celebrating">🎉 Celebrating</option>
+          </select>
+        </div>
+      </div>
+      <div class="product-grid" id="productsGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PRODUCT DETAIL PAGE ══════════ -->
+<div class="page" id="page-detail">
+  <div style="padding:2rem 4rem;" id="detailContent"></div>
+</div>
+
+<!-- ══════════ CART PAGE ══════════ -->
+<div class="page" id="page-cart">
+  <div style="padding:2rem 4rem;max-width:900px;margin:0 auto;">
+    <div class="section-label">Your Bag</div>
+    <h2 class="section-title" style="margin-bottom:2rem;">Shopping Cart</h2>
+    <div id="cartContent"></div>
+  </div>
+</div>
+
+<!-- ══════════ GROUPBUY PAGE ══════════ -->
+<div class="page" id="page-groupbuy">
+  <div style="padding:2rem 4rem;">
+    <div class="section-label">👥 Exclusive Feature</div>
+    <h2 class="section-title" style="margin-bottom:.5rem;">GroupBuy™ Deals</h2>
+    <p style="opacity:.6;margin-bottom:2rem;">The more people join, the lower the price drops for everyone.</p>
+    <div class="product-grid" id="groupbuyGrid"></div>
+  </div>
+</div>
+
+<!-- ══════════ MYSTERY BOX PAGE ══════════ -->
+<div class="page" id="page-mystery">
+  <div style="padding:2rem 4rem;max-width:1000px;margin:0 auto;">
+    <div class="section-label" style="text-align:center;">📦 Surprise Shopping</div>
+    <h2 class="section-title" style="text-align:center;margin-bottom:.5rem;">MysteryBox™</h2>
+    <p style="opacity:.6;text-align:center;margin-bottom:3rem;">Pay one price. Receive curated products worth much more. Unboxing animation included!</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;" id="mysteryBoxGrid"></div>
+  </div>
+</div>
+
+<!-- ══════════ ORDERS PAGE ══════════ -->
+<div class="page" id="page-orders">
+  <div style="padding:2rem 4rem;max-width:800px;margin:0 auto;">
+    <div class="section-label">Your History</div>
+    <h2 class="section-title" style="margin-bottom:2rem;">Order History</h2>
+    <div id="ordersContent"></div>
+  </div>
+</div>
+
+<!-- ══════════ LOGIN PAGE ══════════ -->
+<div class="page" id="page-login">
+  <div style="padding:2rem;display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 80px);">
+    <div class="glass2" style="border-radius:1.8rem;padding:2.5rem;width:100%;max-width:400px;">
+      <div style="font-size:2rem;text-align:center;margin-bottom:.5rem;">🛍️</div>
+      <h2 class="font-display" style="text-align:center;font-size:1.8rem;font-weight:800;margin-bottom:.4rem;">Welcome to Bazario</h2>
+      <p style="text-align:center;opacity:.5;font-size:.85rem;margin-bottom:2rem;">Sign in to unlock all 10 features</p>
+      <div class="form-group"><label class="form-label">Your Name</label><input class="form-input" type="text" id="loginName" placeholder="e.g. Prem Kumar"></div>
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" id="loginEmail" placeholder="you@example.com"></div>
+      <button class="btn-coral" style="width:100%;margin-top:.5rem;" onclick="doLogin()">SIGN IN →</button>
+      <p style="text-align:center;font-size:.75rem;opacity:.4;margin-top:1.2rem;">No password needed for this demo. Just enter your name and email.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CHECKOUT PAGE ══════════ -->
+<div class="page" id="page-profile">
+  <div style="padding:2rem 4rem;">
+    <div id="profileContent"></div>
+  </div>
+</div>
+
+<div class="page" id="page-checkout">
+  <div style="padding:2rem 4rem;max-width:900px;margin:0 auto;">
+    <div class="section-label">Final Step</div>
+    <h2 class="section-title" style="margin-bottom:2rem;">Checkout</h2>
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:2rem;" id="checkoutContent"></div>
+  </div>
+</div>
+
+<!-- ══════════ SUCCESS PAGE ══════════ -->
+<div class="page" id="page-success">
+  <div style="padding:4rem;text-align:center;" id="successContent"></div>
+</div>
+
+<!-- ══════════ MODAL ══════════ -->
+<div class="modal-overlay" id="modalOverlay" style="display:none;" onclick="closeModal(event)">
+  <div class="modal-box" id="modalBox" onclick="event.stopPropagation()">
+    <div class="modal-close" onclick="closeModal()">✕</div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<footer>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;">
+    <div>
+      <div class="nav-logo" style="margin-bottom:.75rem;font-size:1.4rem;">BAZ<span style="color:var(--coral)">ARIO</span></div>
+      <p style="font-size:.82rem;opacity:.5;line-height:1.7;">The next-generation shopping platform with 10 features no other store has.</p>
+    </div>
+    <div><div style="font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.4;margin-bottom:1rem;">Features</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.82rem;opacity:.6;">
+        <span>🎭 MoodCart™</span><span>👥 GroupBuy™</span><span>⚡ BidFlash™</span><span>🎰 SpinDeal™</span><span>🌿 EcoScore™</span>
+      </div>
+    </div>
+    <div><div style="font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.4;margin-bottom:1rem;">More Features</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.82rem;opacity:.6;">
+        <span>📈 PriceTimeline™</span><span>🧠 BundleAI™</span><span>🔗 SocialCart™</span><span>📦 MysteryBox™</span><span>🎙️ VoiceShop™</span>
+      </div>
+    </div>
+    <div><div style="font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.4;margin-bottom:1rem;">Trust</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;font-size:.82rem;opacity:.6;">
+        <span>🔒 Razorpay Secured</span><span>🚚 Free Shipping ₹499+</span><span>↩️ Easy Returns</span><span>💬 24/7 Support</span>
+      </div>
+    </div>
+  </div>
+  <div class="divider" style="margin:2rem 0;"></div>
+  <div style="text-align:center;font-size:.78rem;opacity:.35;">© 2026 Bazario. Built with ❤️ — Frontend Only · No Backend · localStorage + Razorpay</div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const PRODUCTS = [
+  { id:1, name:"Sony WH-1000XM5 Headphones", cat:"Electronics", price:24999, orig:34990, img:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80", rating:4.8, reviews:3421, stock:12, eco:"B", co2:4.2, pkg:"Recycled", badge:"BidFlash", isBidFlash:true, bidStart:17999, moodTags:["Treating Myself","Feeling Productive"], bundleWith:[5,3], priceHist:[28000,27500,26999,26999,25999,24999,24999,26000,27000,24999,24999,23999,24999,25999,26999,24999,24999,24999,24999,26000,24999,24999,24999,24999,24999,25000,24999,24999,24999,24999], mysteryTier:"Platinum" },
+  { id:2, name:"Nova Smartwatch Ultra X3", cat:"Electronics", price:8999, orig:14990, img:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80", rating:4.6, reviews:892, stock:8, eco:"C", co2:2.1, pkg:"Plastic", badge:"New", moodTags:["Treating Myself","Feeling Productive","Celebrating"], bundleWith:[1], priceHist:[11000,10500,9999,9999,9499,8999,8999,9500,9999,9499,8999,8999,8999,9000,9999,8999,8999,8999,8999,9200,8999,8999,8999,8999,8999,9000,8999,8999,8999,8999], mysteryTier:"Gold" },
+  { id:3, name:"Mechanical Gaming Keyboard TK68", cat:"Electronics", price:5499, orig:8999, img:"https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500&q=80", rating:4.9, reviews:2105, stock:20, eco:"A", co2:1.1, pkg:"Recycled", badge:"Best Seller", moodTags:["Feeling Productive","Bored at Home"], bundleWith:[5], priceHist:[7000,6999,6499,6499,5999,5499,5499,6000,6500,5999,5499,5499,5499,5800,6499,5499,5499,5499,5499,5900,5499,5499,5499,5499,5499,5700,5499,5499,5499,5499], mysteryTier:"Gold" },
+  { id:4, name:"Linen Sage Relaxed Shirt", cat:"Clothing", price:1299, orig:1999, img:"https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500&q=80", rating:4.3, reviews:614, stock:35, eco:"A", co2:0.8, pkg:"Biodegradable", badge:"Eco Pick", moodTags:["Treating Myself","Celebrating","Need a Gift"], bundleWith:[8], priceHist:[1799,1699,1499,1499,1399,1299,1299,1499,1599,1399,1299,1299,1299,1400,1599,1299,1299,1299,1299,1450,1299,1299,1299,1299,1299,1399,1299,1299,1299,1299], mysteryTier:"Silver" },
+  { id:5, name:"Logitech MX Master 3S Mouse", cat:"Electronics", price:6999, orig:9990, img:"https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&q=80", rating:4.9, reviews:4201, stock:15, eco:"B", co2:1.3, pkg:"Recycled", badge:"Top Rated", moodTags:["Feeling Productive"], bundleWith:[3,1], priceHist:[8500,8200,7999,7999,7499,6999,6999,7500,8000,7499,6999,6999,6999,7200,7999,6999,6999,6999,6999,7300,6999,6999,6999,6999,6999,7100,6999,6999,6999,6999], mysteryTier:"Gold" },
+  { id:6, name:"Full-Grain Leather Tote Bag", cat:"Clothing", price:3499, orig:5999, img:"https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&q=80", rating:4.7, reviews:382, stock:6, eco:"B", co2:3.5, pkg:"Recycled", badge:"Limited", moodTags:["Treating Myself","Need a Gift","Celebrating"], bundleWith:[4], priceHist:[4999,4799,4499,4499,3999,3499,3499,4200,4500,3999,3499,3499,3499,3800,4499,3499,3499,3499,3499,3900,3499,3499,3499,3499,3499,3700,3499,3499,3499,3499], mysteryTier:"Gold" },
+  { id:7, name:"Ceramic Pour-Over Coffee Set", cat:"Home", price:1599, orig:2499, img:"https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=500&q=80", rating:4.8, reviews:921, stock:22, eco:"A", co2:0.6, pkg:"Biodegradable", badge:"Top Rated", moodTags:["Bored at Home","Need a Gift","Treating Myself"], bundleWith:[], priceHist:[2099,1999,1799,1799,1699,1599,1599,1799,1899,1699,1599,1599,1599,1700,1799,1599,1599,1599,1599,1750,1599,1599,1599,1599,1599,1699,1599,1599,1599,1599], mysteryTier:"Silver" },
+  { id:8, name:"Premium Yoga Mat — Midnight", cat:"Sports", price:1899, orig:2999, img:"https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&q=80", rating:4.5, reviews:773, stock:28, eco:"A", co2:0.9, pkg:"Biodegradable", moodTags:["Feeling Productive","Bored at Home"], bundleWith:[], priceHist:[2499,2299,2099,2099,1999,1899,1899,2099,2199,1999,1899,1899,1899,2000,2099,1899,1899,1899,1899,2000,1899,1899,1899,1899,1899,1999,1899,1899,1899,1899], mysteryTier:"Silver" },
+  { id:9, name:"Polarized Sunglasses — Slate", cat:"Clothing", price:2199, orig:3499, img:"https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&q=80", rating:4.4, reviews:441, stock:14, eco:"C", co2:1.5, pkg:"Plastic", moodTags:["Celebrating","Treating Myself"], bundleWith:[6], priceHist:[2999,2799,2499,2499,2299,2199,2199,2499,2599,2299,2199,2199,2199,2300,2499,2199,2199,2199,2199,2350,2199,2199,2199,2199,2199,2299,2199,2199,2199,2199], mysteryTier:"Silver" },
+  { id:10, name:"Soy Wax Scented Candle Set", cat:"Home", price:799, orig:1299, img:"https://images.unsplash.com/photo-1602178791078-c8de2c0d4b14?w=500&q=80", rating:4.6, reviews:1203, stock:50, eco:"A", co2:0.3, pkg:"Biodegradable", badge:"Eco Pick", moodTags:["Bored at Home","Need a Gift","Treating Myself","Celebrating"], bundleWith:[7], priceHist:[1099,999,899,899,849,799,799,899,949,849,799,799,799,850,899,799,799,799,799,870,799,799,799,799,799,850,799,799,799,799], mysteryTier:"Silver" },
+  { id:11, name:"Noise-Cancelling Earbuds Pro", cat:"Electronics", price:3999, orig:6990, img:"https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?w=500&q=80", rating:4.5, reviews:1890, stock:18, eco:"B", co2:1.8, pkg:"Recycled", badge:"Sale", moodTags:["Treating Myself","Feeling Productive"], bundleWith:[1,5], priceHist:[5999,5500,5000,4999,4499,3999,3999,4500,4999,4499,3999,3999,3999,4200,4999,3999,3999,3999,3999,4300,3999,3999,3999,3999,3999,4100,3999,3999,3999,3999], mysteryTier:"Gold" },
+  { id:12, name:"Anti-Gravity Running Shoes", cat:"Sports", price:4499, orig:7499, img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80", rating:4.7, reviews:2341, stock:10, eco:"C", co2:4.9, pkg:"Plastic", badge:"Popular", moodTags:["Feeling Productive","Celebrating"], bundleWith:[8], priceHist:[6500,6200,5999,5999,5499,4999,4499,5000,5500,4999,4499,4499,4499,4700,5499,4499,4499,4499,4499,4800,4499,4499,4499,4499,4499,4700,4499,4499,4499,4499], mysteryTier:"Gold" },
+];
+
+const MYSTERY_BOXES = [
+  { id:"silver", name:"Silver Box", emoji:"🥈", price:299, worth:599, color:"#9CA3AF", glow:"", theme:"Everyday Essentials", desc:"3 surprise items: lifestyle, home & personal care", items:["Scented Candles","Yoga Mat","Coffee Set"] },
+  { id:"gold", name:"Gold Box", emoji:"🥇", price:799, worth:1800, color:"var(--gold)", glow:"mystery-glow-gold", theme:"Style & Tech", desc:"4 surprise items: fashion, accessories & gadgets", items:["Sunglasses","Smart Earbuds","Leather Bag","Keyboard"] },
+  { id:"platinum", name:"Platinum Box", emoji:"💎", price:1999, worth:5000, color:"var(--teal)", glow:"mystery-glow-teal", theme:"Premium Collection", desc:"5 premium items: electronics, luxury & exclusive", items:["Sony Headphones","Smartwatch","Mouse","Running Shoes","Keyboard"] },
+];
+
+const SPIN_SEGMENTS = ["Free Shipping","5% Off","10% Off","₹100 Off","15% Off","Try Again","Free Gift","20% Off"];
+const SPIN_COLORS = ["#2f7b43","#ef5b3f","#1a4f2e","#f0c040","#2f7b43","#3f9252","#0c3018","#d9472b"];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let cart = JSON.parse(localStorage.getItem('baz_cart')||'[]');
+let orders = JSON.parse(localStorage.getItem('baz_orders')||'[]');
+let user = JSON.parse(localStorage.getItem('baz_user')||'null');
+let currentPage = 'home';
+let activeMood = 'all';
+let activeCat = 'All';
+let activeEco = 'all';
+let sortMode = 'default';
+let moodFilterProd = 'all';
+let bidInterval = null;
+let spinResult = null;
+let spinDiscount = null;
+let voiceOn = false;
+let recognition = null;
+let groupJoins = JSON.parse(localStorage.getItem('baz_groups')||'{}');
+let profileTab = 'profile';
+
+function escapeHTML(v=''){
+  return String(v??'').replace(/[&<>"']/g,ch=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]));
+}
+
+function defaultCoupons(){
+  return [
+    { code:'WELCOME150', title:'Welcome Savings', detail:'Flat ₹150 off on orders above ₹999.', status:'Ready', accent:'coral' },
+    { code:'GREEN10', title:'Eco Shopper Bonus', detail:'Save 10% extra on EcoScore A and B picks.', status:'Ready', accent:'teal' },
+    { code:'FREESHIP', title:'Free Shipping Pass', detail:'Free shipping on your next eligible order.', status:'Unlocked', accent:'gold' }
+  ];
+}
+
+function updateUserIcon(){
+  const icon=document.getElementById('userIcon');
+  if(!icon) return;
+  icon.textContent = user ? '👋' : '👤';
+  icon.title = user ? 'My Profile' : 'Login';
+}
+
+function hydrateUserProfile(){
+  if(!user) return;
+  const parts = (user.name||'').trim().split(/\s+/).filter(Boolean);
+  user.firstName = user.firstName || parts[0] || '';
+  user.lastName = user.lastName || parts.slice(1).join(' ');
+  user.name = `${user.firstName||''} ${user.lastName||''}`.trim() || user.name || 'Bazario User';
+  user.gender = user.gender || 'Prefer not to say';
+  user.phone = user.phone || '';
+  user.pan = (user.pan || '').toUpperCase();
+  user.panName = user.panName || user.name || '';
+  user.panVerified = Boolean(user.panVerified && /^[A-Z]{5}[0-9]{4}[A-Z]$/.test(user.pan));
+  user.addresses = Array.isArray(user.addresses) ? user.addresses.map((addr,idx)=>({
+    id:addr.id || Date.now() + idx,
+    label:addr.label || addr.type || `Address ${idx+1}`,
+    name:addr.name || addr.recipient || user.name || '',
+    phone:addr.phone || user.phone || '',
+    line:addr.line || addr.line1 || addr.address || '',
+    city:addr.city || '',
+    state:addr.state || '',
+    pin:addr.pin || addr.pincode || '',
+    country:addr.country || 'India',
+    isDefault:Boolean(addr.isDefault || idx===0)
+  })) : [];
+  if(user.addresses.length && !user.addresses.some(addr=>addr.isDefault)) user.addresses[0].isDefault = true;
+  user.payments = user.payments || { giftCards:0, savedUPI:[], savedCards:[], usedGiftCodes:[] };
+  user.payments.giftCards = Number(user.payments.giftCards || 0);
+  user.payments.savedUPI = Array.isArray(user.payments.savedUPI) ? user.payments.savedUPI : [];
+  user.payments.savedCards = Array.isArray(user.payments.savedCards) ? user.payments.savedCards : [];
+  user.payments.usedGiftCodes = Array.isArray(user.payments.usedGiftCodes) ? user.payments.usedGiftCodes : [];
+  user.coupons = Array.isArray(user.coupons) && user.coupons.length ? user.coupons : defaultCoupons();
+}
+
+function getDefaultAddress(){
+  if(!user?.addresses?.length) return null;
+  return user.addresses.find(addr=>addr.isDefault) || user.addresses[0];
+}
+
+function getProfileCompletion(){
+  if(!user) return 0;
+  const defaultAddr = getDefaultAddress();
+  const checks = [user.firstName, user.email, user.phone, defaultAddr?.line, user.panVerified];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
+}
+
+// ══════════════════════════════════════════
+// SAVE
+// ══════════════════════════════════════════
+function saveCart(){ localStorage.setItem('baz_cart',JSON.stringify(cart)); updateCartBadge(); }
+function saveOrders(){ localStorage.setItem('baz_orders',JSON.stringify(orders)); }
+function saveUser(){
+  if(user) hydrateUserProfile();
+  if(user) localStorage.setItem('baz_user',JSON.stringify(user));
+  else localStorage.removeItem('baz_user');
+  updateUserIcon();
+}
+function saveGroups(){ localStorage.setItem('baz_groups',JSON.stringify(groupJoins)); }
+
+function updateCartBadge(){
+  const n = cart.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('cartBadge').textContent = n;
+}
+updateCartBadge();
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function goTo(page, data=null){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.toggle('active', a.dataset.page===page));
+  currentPage = page;
+  window.scrollTo(0,0);
+  if(page==='home') renderHome();
+  if(page==='products') renderProducts();
+  if(page==='cart') renderCart();
+  if(page==='groupbuy') renderGroupBuy();
+  if(page==='mystery') renderMystery();
+  if(page==='orders') renderOrders();
+  if(page==='profile') renderProfile();
+  if(page==='checkout') renderCheckout();
+  if(page==='detail' && data) renderDetail(data);
+}
+
+function handleUserAction(){
+  if(!user){ goTo('login'); return; }
+  goTo('profile');
+}
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function toast(msg, type='success'){
+  const tc = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.textContent = msg;
+  tc.appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+}
+
+// ══════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════
+function openModal(html){
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').style.display='flex';
+}
+function closeModal(e){
+  if(!e || e.target===document.getElementById('modalOverlay'))
+    document.getElementById('modalOverlay').style.display='none';
+}
+
+// ══════════════════════════════════════════
+// CART OPERATIONS
+// ══════════════════════════════════════════
+function addToCart(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  const ex = cart.find(x=>x.id===id);
+  if(ex) ex.qty++;
+  else cart.push({...p, qty:1, lockedPrice:null});
+  saveCart();
+  toast(`🛒 ${p.name.slice(0,25)}... added!`,'success');
+}
+function removeFromCart(id){ cart=cart.filter(x=>x.id!==id); saveCart(); renderCart(); }
+function updateQty(id,q){
+  if(q<1){ removeFromCart(id); return; }
+  const i=cart.find(x=>x.id===id); if(i) i.qty=q;
+  saveCart(); renderCart();
+}
+function clearCart(){ cart=[]; saveCart(); }
+
+function cartSubtotal(){
+  return cart.reduce((s,i)=>{
+    const gd = groupJoins[i.id] ? getGroupDiscount(i.id) : 0;
+    const basePrice = i.lockedPrice || i.price;
+    return s + basePrice*(1-gd)*i.qty;
+  },0);
+}
+function getGroupDiscount(id){
+  const joins = groupJoins[id]||0;
+  if(joins>=50) return .28;
+  if(joins>=30) return .20;
+  if(joins>=15) return .12;
+  if(joins>=5)  return .05;
+  return 0;
+}
+function cartShipping(){ return cartSubtotal()>=499?0:49; }
+function cartGST(){ return Math.round(cartSubtotal()*0.18); }
+function cartTotal(){ 
+  let t = cartSubtotal()+cartShipping()+cartGST();
+  if(spinDiscount){ 
+    if(spinDiscount.type==='pct') t = t*(1-spinDiscount.val);
+    else if(spinDiscount.type==='flat') t = Math.max(0,t-spinDiscount.val);
+  }
+  return Math.round(t);
+}
+
+// ══════════════════════════════════════════
+// MOOD + FILTER
+// ══════════════════════════════════════════
+function setMood(mood, el){
+  activeMood=mood;
+  document.querySelectorAll('#moodSelector .mood-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  const title = mood==='all' ? "Today's Top Picks" : `Perfect for "${mood}"`;
+  document.getElementById('featuredTitle').textContent=title;
+  renderHomeGrid();
+}
+function filterCat(cat,el){ activeCat=cat; document.querySelectorAll('.cat-item').forEach(c=>c.classList.remove('active')); el.classList.add('active'); renderProducts(); }
+function filterEco(eco,el){ activeEco=eco; renderProducts(); }
+function filterMood(val){ moodFilterProd=val; renderProducts(); }
+function sortProducts(val){ sortMode=val; renderProducts(); }
+function handleSearch(v){
+  if(currentPage!=='products') goTo('products');
+  activeCat='All'; renderProducts(v);
+}
+
+function getFilteredProducts(search=''){
+  let list = [...PRODUCTS];
+  if(activeCat!=='All') list=list.filter(p=>p.cat===activeCat);
+  if(search) list=list.filter(p=>p.name.toLowerCase().includes(search.toLowerCase()));
+  if(activeEco==='A') list=list.filter(p=>p.eco==='A');
+  if(activeEco==='AB') list=list.filter(p=>['A','B'].includes(p.eco));
+  if(moodFilterProd!=='all') list=list.filter(p=>p.moodTags.includes(moodFilterProd));
+  if(sortMode==='low') list.sort((a,b)=>a.price-b.price);
+  if(sortMode==='high') list.sort((a,b)=>b.price-a.price);
+  if(sortMode==='rating') list.sort((a,b)=>b.rating-a.rating);
+  if(sortMode==='eco') list.sort((a,b)=>a.eco.localeCompare(b.eco));
+  return list;
+}
+
+// ══════════════════════════════════════════
+// RENDER HELPERS
+// ══════════════════════════════════════════
+function stars(r){
+  return '★'.repeat(Math.floor(r))+'☆'.repeat(5-Math.floor(r));
+}
+function fmt(n){ return '₹'+n.toLocaleString('en-IN'); }
+function pct(orig,price){ return Math.round((1-price/orig)*100); }
+
+function productCardHTML(p, mini=false){
+  const disc = pct(p.orig,p.price);
+  const badgeMap = {'BidFlash':'badge-coral','New':'badge-teal','Best Seller':'badge-gold','Top Rated':'badge-gold','Limited':'badge-coral','Sale':'badge-coral','Popular':'badge-teal','Eco Pick':'badge-teal'};
+  return `
+  <div class="product-card" onclick="goTo('detail',${p.id})">
+    <div style="overflow:hidden;border-radius:1.5rem 1.5rem 0 0;position:relative;">
+      <img class="product-card-img" src="${p.img}" alt="${p.name}">
+      <span class="eco-badge eco-${p.eco}">${p.eco} Eco</span>
+      ${p.badge?`<span class="top-badge ${badgeMap[p.badge]||'badge-coral'}">${p.badge==='BidFlash'?'⚡ ':p.badge==='New'?'✦ ':p.badge==='Eco Pick'?'🌿 ':''}${p.badge}</span>`:''}
+    </div>
+    <div class="product-card-body">
+      <div style="font-size:.7rem;opacity:.45;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;">${p.cat}</div>
+      <div style="font-weight:700;font-size:.9rem;line-height:1.3;margin-bottom:.5rem;">${p.name}</div>
+      <div class="stars" style="font-size:.75rem;margin-bottom:.6rem;">${stars(p.rating)} <span style="opacity:.5;font-size:.72rem;font-weight:600;">${p.rating} (${p.reviews})</span></div>
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;">
+        <span style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.1rem;">${fmt(p.price)}</span>
+        <span class="price-old">${fmt(p.orig)}</span>
+        <span class="discount-pct">${disc}% OFF</span>
+      </div>
+      <button class="btn-coral btn-sm" style="width:100%;" onclick="event.stopPropagation();addToCart(${p.id})">+ Add to Cart</button>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════
+function renderHome(){ renderHomeGrid(); }
+function renderHomeGrid(){
+  let list = PRODUCTS;
+  if(activeMood!=='all') list=list.filter(p=>p.moodTags.includes(activeMood));
+  document.getElementById('homeProductGrid').innerHTML = list.slice(0,8).map(p=>productCardHTML(p)).join('');
+}
+
+// ══════════════════════════════════════════
+// PRODUCTS PAGE
+// ══════════════════════════════════════════
+function renderProducts(search=''){
+  const list = getFilteredProducts(search||document.getElementById('searchInput').value);
+  document.getElementById('productsGrid').innerHTML = list.map(p=>productCardHTML(p)).join('');
+  document.getElementById('productsCount').textContent = list.length+' products found';
+  document.getElementById('productsTitle').textContent = activeCat==='All'?'All Products':activeCat;
+}
+
+// ══════════════════════════════════════════
+// PRODUCT DETAIL
+// ══════════════════════════════════════════
+function renderDetail(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  if(bidInterval) clearInterval(bidInterval);
+  const disc=pct(p.orig,p.price);
+  const bundle = p.bundleWith.map(bid=>PRODUCTS.find(x=>x.id===bid)).filter(Boolean);
+  const bundleTotal = bundle.reduce((s,b)=>s+b.price,p.price);
+  const bundleSave = Math.round(bundleTotal*0.15);
+  const bundlePrice = bundleTotal-bundleSave;
+
+  // Price chart SVG
+  const min=Math.min(...p.priceHist), max=Math.max(...p.priceHist);
+  const h=70, w=400;
+  const pts = p.priceHist.map((v,i)=>{
+    const x=(i/(p.priceHist.length-1))*w;
+    const y=h-((v-min)/(max-min||1))*(h-10)-5;
+    return `${x},${y}`;
+  }).join(' ');
+  const chartSVG = `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:70px;">
+    <polyline points="${pts}" fill="none" stroke="rgba(52,211,153,0.7)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${w}" cy="${h-((p.price-min)/(max-min||1))*(h-10)-5}" r="5" fill="var(--coral)"/>
+    <line x1="${w*(p.priceHist.indexOf(min)/(p.priceHist.length-1))}" y1="0" x2="${w*(p.priceHist.indexOf(min)/(p.priceHist.length-1))}" y2="${h}" stroke="rgba(240,192,64,0.3)" stroke-dasharray="4"/>
+  </svg>`;
+
+  const isBidFlash = p.isBidFlash;
+
+  document.getElementById('detailContent').innerHTML = `
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-bottom:3rem;">
+    <div>
+      <div class="glass2" style="border-radius:1.5rem;padding:.75rem;position:sticky;top:90px;">
+        <img src="${p.img}" style="width:100%;border-radius:1rem;max-height:420px;object-fit:cover;">
+        ${isBidFlash?`<div style="margin-top:1rem;padding:1rem;background:var(--coral3);border:1px solid rgba(239,91,63,.3);border-radius:1rem;text-align:center;">
+          <div style="font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);margin-bottom:.3rem;">⚡ BidFlash™ — Price Rises Every 3 Seconds!</div>
+          <div class="bid-timer" id="bidTimer">60</div>
+          <div style="font-size:.75rem;opacity:.6;margin-bottom:.5rem;">seconds remaining</div>
+          <div class="bid-price" id="bidPrice">${fmt(p.bidStart)}</div>
+          <div style="font-size:.75rem;opacity:.5;margin-bottom:.8rem;">current bid price</div>
+          <button class="btn-gold" style="width:100%;" id="lockBtn" onclick="lockBid(${p.id},${p.bidStart})">🔒 Lock My Price Now</button>
+        </div>`:''}
+      </div>
+    </div>
+    <div>
+      <div style="font-size:.7rem;opacity:.45;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">${p.cat}</div>
+      <h1 class="font-display" style="font-size:1.9rem;font-weight:800;line-height:1.2;margin-bottom:.75rem;">${p.name}</h1>
+      <div class="stars" style="margin-bottom:.75rem;">${stars(p.rating)} <span style="opacity:.5;font-size:.82rem;">${p.rating} — ${p.reviews} reviews</span></div>
+      
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+        <span class="font-display" style="font-size:2.2rem;font-weight:900;">${fmt(p.price)}</span>
+        <span class="price-old" style="font-size:1rem;">${fmt(p.orig)}</span>
+        <span class="discount-pct" style="font-size:.85rem;">${disc}% OFF</span>
+      </div>
+
+      <!-- ECOSCORE -->
+      <div class="glass" style="border-radius:1rem;padding:1rem;margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem;">
+          <span class="eco-badge eco-${p.eco}" style="position:static;font-size:.8rem;">Grade ${p.eco}</span>
+          <span style="font-weight:700;font-size:.88rem;">🌿 EcoScore™</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;">
+          <div style="font-size:.72rem;opacity:.6;text-align:center;"><div style="font-size:1rem;">${p.co2}kg</div>CO₂</div>
+          <div style="font-size:.72rem;opacity:.6;text-align:center;"><div style="font-size:1rem;">${p.pkg==='Biodegradable'?'♻️':p.pkg==='Recycled'?'🔄':'⚠️'}</div>${p.pkg}</div>
+          <div style="font-size:.72rem;opacity:.6;text-align:center;"><div style="font-size:1rem;">${p.eco==='A'?'🌱':p.eco==='B'?'🍃':p.eco==='C'?'🌿':'🍂'}</div>${p.eco==='A'?'Excellent':p.eco==='B'?'Good':p.eco==='C'?'Average':'Needs Work'}</div>
+        </div>
+      </div>
+
+      <!-- PRICETIMELINE -->
+      <div class="glass" style="border-radius:1rem;padding:1rem;margin-bottom:1rem;">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:.5rem;">📈 PriceTimeline™ — 30 Day History</div>
+        ${chartSVG}
+        <div style="display:flex;justify-content:space-between;margin-top:.5rem;font-size:.72rem;opacity:.6;">
+          <span>Lowest: ${fmt(Math.min(...p.priceHist))}</span>
+          <span style="color:var(--coral);">Today: ${fmt(p.price)}</span>
+          <span>Highest: ${fmt(Math.max(...p.priceHist))}</span>
+        </div>
+        <div style="margin-top:.5rem;font-size:.78rem;font-weight:700;color:${p.price<=Math.min(...p.priceHist)*1.05?'var(--teal)':'var(--coral)'}">
+          ${p.price<=Math.min(...p.priceHist)*1.05?'✓ Great time to buy! Near all-time low.':'↑ Price is currently higher than usual.'}
+        </div>
+      </div>
+
+      <!-- GROUPBUY -->
+      <div class="glass" style="border-radius:1rem;padding:1rem;margin-bottom:1rem;" id="groupbuySection-${p.id}">
+        ${renderGroupBuySection(p)}
+      </div>
+
+      <button class="btn-coral" style="width:100%;margin-bottom:.75rem;font-size:1rem;" onclick="addToCart(${p.id})">🛒 Add to Cart</button>
+      <button class="btn-outline" style="width:100%;" onclick="goTo('cart')">Go to Cart →</button>
+      
+      ${p.description?`<div class="divider"></div><p style="opacity:.7;font-size:.88rem;line-height:1.75;">${p.description||'Premium quality product with exceptional build and performance.'}</p>`:''}
+    </div>
+  </div>
+
+  <!-- BUNDLEAI -->
+  ${bundle.length>0?`
+  <div class="glass" style="border-radius:1.5rem;padding:1.5rem;margin-bottom:2rem;">
+    <div style="font-weight:800;font-size:1.1rem;font-family:'Outfit',sans-serif;margin-bottom:.5rem;">🧠 BundleAI™ — Frequently Bought Together</div>
+    <p style="font-size:.82rem;opacity:.6;margin-bottom:1.2rem;">Buy as a bundle and save 15% automatically</p>
+    <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+      <div style="text-align:center;"><img src="${p.img}" style="width:80px;height:80px;border-radius:.75rem;object-fit:cover;"><div style="font-size:.72rem;margin-top:.3rem;opacity:.7;">${p.name.slice(0,20)}...</div><div style="font-size:.82rem;font-weight:700;">${fmt(p.price)}</div></div>
+      ${bundle.map(b=>`<span style="opacity:.4;font-size:1.5rem;">+</span><div style="text-align:center;"><img src="${b.img}" style="width:80px;height:80px;border-radius:.75rem;object-fit:cover;"><div style="font-size:.72rem;margin-top:.3rem;opacity:.7;">${b.name.slice(0,20)}...</div><div style="font-size:.82rem;font-weight:700;">${fmt(b.price)}</div></div>`).join('')}
+      <div style="margin-left:auto;text-align:center;">
+        <div style="font-size:.78rem;opacity:.5;text-decoration:line-through;">${fmt(bundleTotal)}</div>
+        <div class="font-display" style="font-size:1.6rem;font-weight:900;color:var(--gold);">${fmt(bundlePrice)}</div>
+        <div style="font-size:.72rem;color:var(--teal);">Save ${fmt(bundleSave)}</div>
+        <button class="btn-gold btn-sm" style="margin-top:.5rem;" onclick="addBundleToCart(${p.id},[${bundle.map(b=>b.id)}])">Add All to Cart</button>
+      </div>
+    </div>
+  </div>`:''}
+  `;
+
+  if(isBidFlash) startBidTimer(p.id, p.bidStart);
+}
+
+function renderGroupBuySection(p){
+  const count = (groupJoins[p.id]||0) + 23; // seed offset
+  const pctFill = Math.min(100, (count/50)*100);
+  const disc = getGroupDiscountLabel(count);
+  const joined = !!groupJoins[p.id];
+  return `
+    <div style="font-weight:700;font-size:.85rem;margin-bottom:.5rem;">👥 GroupBuy™ <span style="font-size:.72rem;font-weight:600;opacity:.6;">${count} people joined</span></div>
+    <div class="groupbuy-bar-track" style="margin-bottom:.5rem;"><div class="groupbuy-bar-fill" style="width:${pctFill}%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:.7rem;opacity:.5;margin-bottom:.6rem;"><span>5 = 5% off</span><span>15 = 12%</span><span>30 = 20%</span><span>50 = 28%</span></div>
+    <div style="font-size:.82rem;font-weight:700;color:var(--teal);margin-bottom:.6rem;">${disc} unlocked for this group!</div>
+    ${joined
+      ? `<div style="font-size:.78rem;color:var(--teal);">✓ You joined! Discount applied at checkout.</div>`
+      : `<button class="btn-teal btn-sm" onclick="joinGroupBuy(${p.id})">👥 Join GroupBuy</button>`
+    }`;
+}
+
+function getGroupDiscountLabel(count){
+  if(count>=50) return '28% OFF';
+  if(count>=30) return '20% OFF';
+  if(count>=15) return '12% OFF';
+  if(count>=5)  return '5% OFF';
+  return 'No discount yet';
+}
+
+function joinGroupBuy(id){
+  groupJoins[id]=(groupJoins[id]||0)+1;
+  saveGroups();
+  const sec=document.getElementById(`groupbuySection-${id}`);
+  if(sec){ const p=PRODUCTS.find(x=>x.id===id); sec.innerHTML=renderGroupBuySection(p); }
+  toast('👥 You joined the GroupBuy! Discount applied at checkout.','success');
+}
+
+function addBundleToCart(mainId, bundleIds){
+  addToCart(mainId);
+  bundleIds.forEach(id=>addToCart(id));
+  toast('🧠 Bundle added! 15% discount applied at checkout.','success');
+}
+
+function lockBid(id, startPrice){
+  if(bidInterval) clearInterval(bidInterval);
+  const priceEl = document.getElementById('bidPrice');
+  const currentBid = parseInt(priceEl.textContent.replace(/[₹,]/g,''));
+  const p = PRODUCTS.find(x=>x.id===id);
+  const cartItem = cart.find(x=>x.id===id);
+  if(cartItem){ cartItem.lockedPrice=currentBid; saveCart(); }
+  else { const np={...p,lockedPrice:currentBid,qty:1}; cart.push(np); saveCart(); }
+  document.getElementById('lockBtn').textContent='✅ Price Locked at '+fmt(currentBid);
+  document.getElementById('lockBtn').disabled=true;
+  toast(`⚡ Price locked at ${fmt(currentBid)}!`,'success');
+}
+
+function startBidTimer(id, startPrice){
+  if(bidInterval) clearInterval(bidInterval);
+  let t=60, price=startPrice;
+  bidInterval = setInterval(()=>{
+    t--;
+    const timerEl=document.getElementById('bidTimer');
+    const priceEl=document.getElementById('bidPrice');
+    if(!timerEl){ clearInterval(bidInterval); return; }
+    timerEl.textContent=t;
+    if(t%3===0){ price+=50; if(priceEl) priceEl.textContent=fmt(price); }
+    if(t<=0){ clearInterval(bidInterval); if(timerEl) timerEl.textContent='0'; }
+  },1000);
+}
+
+// ══════════════════════════════════════════
+// CART PAGE
+// ══════════════════════════════════════════
+function renderCart(){
+  const el = document.getElementById('cartContent');
+  if(cart.length===0){
+    el.innerHTML=`<div style="text-align:center;padding:4rem;">
+      <div style="font-size:4rem;margin-bottom:1rem;">🛒</div>
+      <div class="font-display" style="font-size:1.5rem;font-weight:800;margin-bottom:.5rem;">Your cart is empty</div>
+      <p style="opacity:.5;margin-bottom:1.5rem;">Add some amazing products first</p>
+      <button class="btn-coral" onclick="goTo('products')">Shop Now →</button>
+    </div>`;
+    return;
+  }
+  const sub=Math.round(cartSubtotal()), ship=cartShipping(), gst=cartGST();
+  let finalTotal=sub+ship+gst;
+  let spinLine='';
+  if(spinDiscount){
+    if(spinDiscount.type==='pct'){ const saved=Math.round(finalTotal*spinDiscount.val); finalTotal-=saved; spinLine=`<div class="summary-row" style="color:var(--teal)"><span>🎰 SpinDeal™ (${spinDiscount.label})</span><span>-${fmt(saved)}</span></div>`; }
+    else if(spinDiscount.type==='flat'){ finalTotal=Math.max(0,finalTotal-spinDiscount.val); spinLine=`<div class="summary-row" style="color:var(--teal)"><span>🎰 SpinDeal™ (${spinDiscount.label})</span><span>-${fmt(spinDiscount.val)}</span></div>`; }
+    else { spinLine=`<div class="summary-row" style="color:var(--teal)"><span>🎰 SpinDeal™</span><span>${spinDiscount.label}</span></div>`; }
+  }
+  const lastSpin=localStorage.getItem('baz_lastSpin');
+  const canSpin=lastSpin!==new Date().toDateString();
+
+  el.innerHTML=`
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:2rem;">
+    <div>
+      <div style="display:flex;flex-direction:column;gap:.75rem;" id="cartItems">
+        ${cart.map(item=>{
+          const gd=groupJoins[item.id]?getGroupDiscount(item.id):0;
+          const baseP=item.lockedPrice||item.price;
+          const effP=Math.round(baseP*(1-gd));
+          return `<div class="cart-item">
+            <img src="${item.img}" alt="${item.name}" onclick="goTo('detail',${item.id})" style="cursor:pointer;">
+            <div style="flex:1;">
+              <div style="font-weight:700;margin-bottom:.25rem;">${item.name}</div>
+              <div style="font-size:.78rem;opacity:.5;">${item.cat}</div>
+              ${item.lockedPrice?`<div style="font-size:.72rem;color:var(--coral);font-weight:700;">⚡ BidFlash™ locked price</div>`:''}
+              ${gd>0?`<div style="font-size:.72rem;color:var(--teal);font-weight:700;">👥 GroupBuy™ ${Math.round(gd*100)}% off applied</div>`:''}
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem;">
+                <div class="qty-control">
+                  <div class="qty-btn" onclick="updateQty(${item.id},${item.qty-1})">−</div>
+                  <span style="font-weight:700;min-width:20px;text-align:center;">${item.qty}</span>
+                  <div class="qty-btn" onclick="updateQty(${item.id},${item.qty+1})">+</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:.5rem;">
+                  <span style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1rem;">${fmt(effP*item.qty)}</span>
+                  ${effP<item.price?`<span style="text-decoration:line-through;opacity:.4;font-size:.8rem;">${fmt(item.price*item.qty)}</span>`:''}
+                </div>
+              </div>
+            </div>
+            <div onclick="removeFromCart(${item.id})" style="cursor:pointer;opacity:.4;font-size:1.2rem;padding:.25rem;">✕</div>
+          </div>`;
+        }).join('')}
+      </div>
+      
+      <!-- SOCIAL CART -->
+      <div class="glass" style="border-radius:1rem;padding:1rem;margin-top:1.5rem;">
+        <div style="font-weight:700;font-size:.88rem;margin-bottom:.4rem;">🔗 SocialCart™ — Share for Friends' Votes</div>
+        <p style="font-size:.78rem;opacity:.6;margin-bottom:.75rem;">Generate a link and let friends vote on which items to keep.</p>
+        <button class="btn-outline btn-sm" onclick="shareSocialCart()">📋 Copy Share Link</button>
+      </div>
+    </div>
+
+    <div>
+      <!-- SPIN DEAL -->
+      <div class="glass" style="border-radius:1.2rem;padding:1.2rem;margin-bottom:1rem;text-align:center;">
+        <div style="font-weight:800;font-size:.88rem;font-family:'Outfit',sans-serif;margin-bottom:.3rem;">🎰 SpinDeal™</div>
+        <p style="font-size:.72rem;opacity:.5;margin-bottom:.75rem;">${canSpin?'Spin once today to win a discount!':'You already spun today. Come back tomorrow!'}</p>
+        ${canSpin?`<button class="btn-gold btn-sm" onclick="openSpinWheel()">🎰 Spin the Wheel</button>`:`<div style="font-size:.78rem;color:var(--gold);">🎰 ${spinDiscount?'Discount won: '+spinDiscount.label:'Spin tomorrow!'}</div>`}
+        ${spinDiscount&&spinDiscount.type!=='none'?`<div style="margin-top:.5rem;font-size:.82rem;font-weight:700;color:var(--teal);">✓ ${spinDiscount.label} applied!</div>`:''}
+      </div>
+
+      <!-- ORDER SUMMARY -->
+      <div class="glass2" style="border-radius:1.2rem;padding:1.5rem;">
+        <div style="font-weight:800;font-family:'Outfit',sans-serif;margin-bottom:1rem;">Order Summary</div>
+        <div class="summary-row"><span style="opacity:.7;">Subtotal</span><span>${fmt(sub)}</span></div>
+        <div class="summary-row"><span style="opacity:.7;">Shipping</span><span style="color:${ship===0?'var(--teal)':'inherit'}">${ship===0?'FREE':fmt(ship)}</span></div>
+        <div class="summary-row"><span style="opacity:.7;">GST (18%)</span><span>${fmt(gst)}</span></div>
+        ${spinLine}
+        <div class="divider"></div>
+        <div class="summary-row"><span class="summary-total">Total</span><span class="summary-total" style="color:var(--coral);">${fmt(finalTotal)}</span></div>
+        ${sub>=499?'':`<div style="font-size:.72rem;color:var(--gold);margin-top:.5rem;">Add ${fmt(499-sub)} more for free shipping!</div>`}
+        <button class="btn-coral" style="width:100%;margin-top:1rem;" onclick="${user?'goTo(\'checkout\')':'goTo(\'login\')'}">
+          ${user?'Proceed to Checkout →':'Login to Checkout →'}
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function shareSocialCart(){
+  const data = btoa(encodeURIComponent(JSON.stringify(cart.map(i=>({id:i.id,name:i.name,price:i.price,qty:i.qty,img:i.img})))));
+  const link = window.location.href+'?socialcart='+data;
+  navigator.clipboard.writeText(link).then(()=>toast('🔗 Cart link copied! Share it with friends.','success')).catch(()=>toast('Link: '+link,'info'));
+}
+
+// ══════════════════════════════════════════
+// SPIN WHEEL
+// ══════════════════════════════════════════
+function openSpinWheel(){
+  const winner = Math.floor(Math.random()*8);
+  openModal(`
+    <div style="text-align:center;">
+      <div style="font-weight:800;font-size:1.3rem;font-family:'Outfit',sans-serif;margin-bottom:.3rem;">🎰 SpinDeal™</div>
+      <p style="font-size:.82rem;opacity:.6;margin-bottom:1.5rem;">Spin for your one-time daily discount!</p>
+      <div class="wheel-wrap" style="margin-bottom:1.5rem;">
+        <div class="wheel-pointer"></div>
+        <div class="wheel" id="spinWheel">${generateWheelHTML()}</div>
+        <div class="wheel-center">🎰</div>
+      </div>
+      <button class="btn-gold" id="spinBtn" onclick="doSpin(${winner})">SPIN!</button>
+      <div id="spinResultText" style="margin-top:1rem;font-weight:700;font-size:.9rem;min-height:24px;"></div>
+    </div>`);
+}
+
+function generateWheelHTML(){
+  const colors=['#1a4f2e','#ef5b3f','#0c3018','#f0c040','#2f7b43','#3f9252','#113820','#d9472b'];
+  return SPIN_SEGMENTS.map((seg,i)=>{
+    const angle=i*45;
+    return `<div style="position:absolute;top:50%;left:50%;width:0;height:0;transform:rotate(${angle}deg);">
+      <div style="position:absolute;bottom:0;left:-60px;width:120px;height:140px;background:${colors[i]};clip-path:polygon(50% 0%,0% 100%,100% 100%);transform-origin:50% 0%;opacity:.9;"></div>
+      <div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%) rotate(${90}deg);font-size:.45rem;font-weight:800;color:#fff;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.5);">${seg}</div>
+    </div>`;
+  }).join('');
+}
+
+function doSpin(winner){
+  const btn=document.getElementById('spinBtn');
+  btn.disabled=true;btn.textContent='Spinning...';
+  const wheel=document.getElementById('spinWheel');
+  const deg=360*5+(winner*45);
+  wheel.style.transform=`rotate(${deg}deg)`;
+  setTimeout(()=>{
+    const seg=SPIN_SEGMENTS[winner];
+    const result=document.getElementById('spinResultText');
+    result.textContent=`🎉 You won: ${seg}!`;
+    result.style.color='var(--gold)';
+    applySpinDiscount(seg);
+    localStorage.setItem('baz_lastSpin',new Date().toDateString());
+    btn.textContent='Claimed!';
+    toast('🎰 '+seg+' applied to your cart!','success');
+  },4200);
+}
+
+function applySpinDiscount(seg){
+  if(seg==='5% Off') spinDiscount={type:'pct',val:.05,label:'5% Off'};
+  else if(seg==='10% Off') spinDiscount={type:'pct',val:.10,label:'10% Off'};
+  else if(seg==='15% Off') spinDiscount={type:'pct',val:.15,label:'15% Off'};
+  else if(seg==='20% Off') spinDiscount={type:'pct',val:.20,label:'20% Off'};
+  else if(seg==='₹100 Off') spinDiscount={type:'flat',val:100,label:'₹100 Off'};
+  else if(seg==='Free Shipping') spinDiscount={type:'freeship',val:0,label:'Free Shipping'};
+  else if(seg==='Free Gift') spinDiscount={type:'gift',val:0,label:'Free Gift Added!'};
+  else spinDiscount=null;
+}
+
+// ══════════════════════════════════════════
+// GROUPBUY PAGE
+// ══════════════════════════════════════════
+function renderGroupBuy(){
+  const items = PRODUCTS.filter(p=>p.bundleWith||true).slice(0,8);
+  document.getElementById('groupbuyGrid').innerHTML=items.map(p=>{
+    const count=(groupJoins[p.id]||0)+23;
+    const disc=getGroupDiscountLabel(count);
+    const pctF=Math.min(100,(count/50)*100);
+    return `<div class="glass product-card" style="padding:0;cursor:default;">
+      <div style="overflow:hidden;border-radius:1.5rem 1.5rem 0 0;"><img src="${p.img}" style="width:100%;height:180px;object-fit:cover;"></div>
+      <div style="padding:1.2rem;">
+        <div style="font-weight:700;font-size:.9rem;margin-bottom:.4rem;">${p.name.slice(0,35)}...</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:.6rem;">${fmt(p.price)} <span style="color:var(--teal);font-size:.8rem;">${disc}</span></div>
+        <div style="font-size:.72rem;opacity:.5;margin-bottom:.3rem;">${count} people joined · ${pctF.toFixed(0)}% to max discount</div>
+        <div class="groupbuy-bar-track" style="margin-bottom:.6rem;"><div class="groupbuy-bar-fill" style="width:${pctF}%"></div></div>
+        <div style="display:flex;gap:.5rem;">
+          <button class="btn-teal btn-sm" style="flex:1;" onclick="joinGroupBuy(${p.id})">👥 Join Group</button>
+          <button class="btn-coral btn-sm" onclick="addToCart(${p.id})">Add Cart</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// MYSTERY BOX
+// ══════════════════════════════════════════
+function renderMystery(){
+  document.getElementById('mysteryBoxGrid').innerHTML=MYSTERY_BOXES.map(b=>`
+  <div class="mystery-box ${b.glow}" onclick="buyMysteryBox('${b.id}')">
+    <div style="font-size:3.5rem;margin-bottom:.75rem;">${b.emoji}</div>
+    <div class="font-display" style="font-size:1.6rem;font-weight:800;margin-bottom:.3rem;color:${b.color};">${b.name}</div>
+    <div style="font-size:.78rem;opacity:.5;margin-bottom:1rem;">${b.theme}</div>
+    <div style="font-family:'Outfit',sans-serif;font-size:2.5rem;font-weight:900;margin-bottom:.2rem;">${fmt(b.price)}</div>
+    <div style="font-size:.78rem;color:var(--teal);margin-bottom:1.2rem;">Worth ${fmt(b.worth)}+ guaranteed</div>
+    <div style="font-size:.8rem;opacity:.6;margin-bottom:1.5rem;">${b.desc}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-bottom:1.5rem;">
+      ${b.items.map(i=>`<span style="background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:50px;padding:.2rem .65rem;font-size:.68rem;font-weight:600;">${i}</span>`).join('')}
+    </div>
+    <button class="btn-coral" style="width:100%;">Buy & Reveal →</button>
+  </div>`).join('');
+}
+
+function buyMysteryBox(tierId){
+  const box=MYSTERY_BOXES.find(b=>b.id===tierId);
+  const eligible=PRODUCTS.filter(p=>p.mysteryTier===box.id.charAt(0).toUpperCase()+box.id.slice(1));
+  const shuffled=[...eligible].sort(()=>Math.random()-.5).slice(0,3);
+  cart.push({id:'mystery-'+Date.now(),name:box.name+' Mystery Box',cat:'Mystery',price:box.price,img:'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=200',qty:1,mysteryBox:true,mysteryReveal:shuffled,mysteryEmoji:box.emoji});
+  saveCart();
+  toast(`${box.emoji} ${box.name} added! Reveals on order success!`,'success');
+  goTo('cart');
+}
+
+// ══════════════════════════════════════════
+// ORDERS PAGE
+// ══════════════════════════════════════════
+function renderOrders(){
+  const el=document.getElementById('ordersContent');
+  if(orders.length===0){
+    el.innerHTML=`<div style="text-align:center;padding:4rem;"><div style="font-size:3rem;">📦</div><div class="font-display" style="font-size:1.3rem;font-weight:700;margin-top:.5rem;">No orders yet</div><p style="opacity:.5;margin-top:.5rem;">Your order history will appear here.</p><button class="btn-coral" style="margin-top:1rem;" onclick="goTo('products')">Shop Now</button></div>`;
+    return;
+  }
+  el.innerHTML=orders.map(o=>`
+  <div class="order-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
+      <div><div class="font-display" style="font-weight:800;">${o.id}</div><div style="font-size:.75rem;opacity:.5;">${o.date}</div></div>
+      <div style="display:flex;gap:.5rem;align-items:center;">
+        <span style="background:var(--teal2);color:var(--teal);border:1px solid rgba(52,211,153,.3);border-radius:50px;padding:.2rem .75rem;font-size:.72rem;font-weight:800;">${o.status}</span>
+        <span class="font-display" style="font-weight:800;font-size:1.1rem;">${fmt(o.total)}</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      ${o.items.slice(0,4).map(i=>`<img src="${i.img}" style="width:52px;height:52px;border-radius:.5rem;object-fit:cover;" title="${i.name}">`).join('')}
+      ${o.items.length>4?`<div style="width:52px;height:52px;border-radius:.5rem;background:var(--glass);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;">+${o.items.length-4}</div>`:''}
+    </div>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// PROFILE
+// ══════════════════════════════════════════
+function switchProfileTab(tab){
+  profileTab = tab;
+  renderProfile();
+}
+
+function profileFullName(){
+  return `${user?.firstName||''} ${user?.lastName||''}`.trim() || user?.name || 'Bazario User';
+}
+
+function renderProfile(){
+  if(!user){ goTo('login'); return; }
+  hydrateUserProfile();
+
+  const totalOrders = orders.length;
+  const savedAddresses = user.addresses.length;
+  const methods = user.payments.savedUPI.length + user.payments.savedCards.length;
+  const savedByGroup = Object.keys(groupJoins||{}).length;
+
+  const sections = {
+    profile: getProfileInfoSection(),
+    addresses: getProfileAddressSection(),
+    pan: getProfilePANSection(),
+    payments: getProfilePaymentSection(),
+  };
+
+  const html = `
+  <div class="profile-shell">
+    <aside class="glass profile-sidebar profile-sticky">
+      <div class="profile-user-card">
+        <div class="profile-avatar">${(user.firstName||'B').slice(0,1).toUpperCase()}</div>
+        <div>
+          <div style="font-size:.74rem;opacity:.6;">Hello,</div>
+          <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1rem;">${profileFullName()}</div>
+          <div style="font-size:.76rem;opacity:.5;">${user.email||''}</div>
+        </div>
+      </div>
+
+      <div class="profile-sidebar-group">
+        <div class="profile-sidebar-title">My Orders</div>
+        <button class="profile-nav-btn" onclick="goTo('orders')"><span>📦 Order History</span><strong>${totalOrders}</strong></button>
+      </div>
+
+      <div class="profile-sidebar-group">
+        <div class="profile-sidebar-title">Account Settings</div>
+        <button class="profile-nav-btn ${profileTab==='profile'?'active':''}" onclick="switchProfileTab('profile')"><span>👤 Profile Information</span><strong>›</strong></button>
+        <button class="profile-nav-btn ${profileTab==='addresses'?'active':''}" onclick="switchProfileTab('addresses')"><span>🏠 Manage Addresses</span><strong>${savedAddresses}</strong></button>
+        <button class="profile-nav-btn ${profileTab==='pan'?'active':''}" onclick="switchProfileTab('pan')"><span>🪪 PAN Card Information</span><strong>›</strong></button>
+      </div>
+
+      <div class="profile-sidebar-group">
+        <div class="profile-sidebar-title">Payments</div>
+        <button class="profile-nav-btn ${profileTab==='payments'?'active':''}" onclick="switchProfileTab('payments')"><span>💳 Payment Methods</span><strong>${methods}</strong></button>
+      </div>
+
+      <button class="btn-outline profile-logout" onclick="logoutUser()">Log Out</button>
+    </aside>
+
+    <section class="glass2 profile-main">
+      <div class="profile-head">
+        <div>
+          <h2 class="profile-title">My Profile</h2>
+          <p class="profile-subtitle">Manage your personal details, addresses, PAN info, and payment preferences in one place.</p>
+        </div>
+      </div>
+
+      <div class="profile-stat-grid">
+        <div class="profile-stat-card"><div class="profile-stat-label">Orders</div><div class="profile-stat-value" style="color:var(--gold);">${totalOrders}</div></div>
+        <div class="profile-stat-card"><div class="profile-stat-label">Saved Addresses</div><div class="profile-stat-value" style="color:var(--teal);">${savedAddresses}</div></div>
+        <div class="profile-stat-card"><div class="profile-stat-label">GroupBuys Joined</div><div class="profile-stat-value" style="color:var(--coral);">${savedByGroup}</div></div>
+      </div>
+
+      ${sections[profileTab]}
+    </section>
+  </div>`;
+
+  document.getElementById('profileContent').innerHTML = html;
+}
+
+function getProfileInfoSection(){
+  return `
+  <div class="profile-section-card">
+    <div class="profile-section-head">
+      <div class="profile-section-title">Personal Information</div>
+      <button class="profile-action-link" onclick="saveProfileInfo()">Save</button>
+    </div>
+
+    <div class="profile-grid-2">
+      <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="pf_first" value="${user.firstName||''}" placeholder="First name"></div>
+      <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="pf_last" value="${user.lastName||''}" placeholder="Last name"></div>
+    </div>
+
+    <div class="profile-grid-2">
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="pf_email" value="${user.email||''}" placeholder="you@example.com"></div>
+      <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" id="pf_phone" value="${user.phone||''}" placeholder="+91 9XXXXXXXXX"></div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Your Gender</label>
+      <div class="profile-radio-row">
+        <label class="profile-radio-pill"><input type="radio" name="pf_gender" value="Male" ${user.gender==='Male'?'checked':''}> Male</label>
+        <label class="profile-radio-pill"><input type="radio" name="pf_gender" value="Female" ${user.gender==='Female'?'checked':''}> Female</label>
+        <label class="profile-radio-pill"><input type="radio" name="pf_gender" value="Other" ${user.gender==='Other'?'checked':''}> Other</label>
+      </div>
+    </div>
+
+    <div class="profile-form-actions">
+      <button class="btn-coral btn-sm" onclick="saveProfileInfo()">Update Profile</button>
+    </div>
+  </div>`;
+}
+
+function saveProfileInfo(){
+  const first = document.getElementById('pf_first')?.value.trim() || '';
+  const last = document.getElementById('pf_last')?.value.trim() || '';
+  const email = document.getElementById('pf_email')?.value.trim() || '';
+  const phone = document.getElementById('pf_phone')?.value.trim() || '';
+  const g = document.querySelector('input[name="pf_gender"]:checked');
+
+  if(!first || !email){ toast('First name and email are required.','error'); return; }
+
+  user.firstName = first;
+  user.lastName = last;
+  user.name = `${first} ${last}`.trim();
+  user.email = email;
+  user.phone = phone;
+  user.gender = g ? g.value : '';
+  saveUser();
+  toast('Profile saved successfully.','success');
+  renderProfile();
+}
+
+function getProfileAddressSection(){
+  const addressList = user.addresses.length
+    ? user.addresses.map(a=>`
+      <div class="profile-address-card">
+        <div class="profile-card-head">
+          <div>
+            <div style="font-weight:800;">${a.name} <span style="opacity:.55;font-weight:600;">• ${a.phone}</span></div>
+            <div class="profile-compact-text">${a.line}, ${a.city}, ${a.state} - ${a.pin}</div>
+            <div style="margin-top:.4rem;">${a.isDefault?'<span class="profile-badge profile-badge-success">Default</span>':'<span class="profile-badge profile-badge-muted">Saved</span>'}</div>
+          </div>
+          <div class="profile-card-actions">
+            ${a.isDefault?'':`<button class="profile-plain-btn" onclick="setDefaultAddress(${a.id})">Set Default</button>`}
+            <button class="profile-plain-btn" onclick="deleteAddress(${a.id})">Remove</button>
+          </div>
+        </div>
+      </div>`).join('')
+    : '<div class="profile-empty">No addresses saved yet.</div>';
+
+  return `
+  <div class="profile-section-card">
+    <div class="profile-section-head">
+      <div class="profile-section-title">Manage Addresses</div>
+    </div>
+
+    <div class="profile-list" style="margin-bottom:1rem;">${addressList}</div>
+
+    <div class="profile-note">Add at least one address to speed up checkout.</div>
+
+    <div class="divider"></div>
+    <div class="profile-grid-2">
+      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="ad_name" placeholder="Recipient name"></div>
+      <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="ad_phone" placeholder="+91 9XXXXXXXXX"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Address Line</label><input class="form-input" id="ad_line" placeholder="House no, Street, Area"></div>
+    <div class="profile-grid-2">
+      <div class="form-group"><label class="form-label">City</label><input class="form-input" id="ad_city" placeholder="City"></div>
+      <div class="form-group"><label class="form-label">State</label><input class="form-input" id="ad_state" placeholder="State"></div>
+    </div>
+    <div class="profile-grid-2">
+      <div class="form-group"><label class="form-label">Pincode</label><input class="form-input" id="ad_pin" placeholder="000000"></div>
+      <div class="form-group"><label class="form-label">Address Type</label><input class="form-input" id="ad_type" placeholder="Home / Work"></div>
+    </div>
+    <div class="profile-form-actions">
+      <button class="btn-teal btn-sm" onclick="addAddress()">Add Address</button>
+    </div>
+  </div>`;
+}
+
+function addAddress(){
+  const name = document.getElementById('ad_name')?.value.trim();
+  const phone = document.getElementById('ad_phone')?.value.trim();
+  const line = document.getElementById('ad_line')?.value.trim();
+  const city = document.getElementById('ad_city')?.value.trim();
+  const state = document.getElementById('ad_state')?.value.trim();
+  const pin = document.getElementById('ad_pin')?.value.trim();
+  const type = document.getElementById('ad_type')?.value.trim() || 'Home';
+
+  if(!name||!phone||!line||!city||!state||!pin){
+    toast('Please fill all address fields.','error');
+    return;
+  }
+
+  const isDefault = user.addresses.length===0;
+  user.addresses.unshift({ id:Date.now(), name, phone, line, city, state, pin, type, isDefault });
+  saveUser();
+  toast('Address added.','success');
+  renderProfile();
+}
+
+function setDefaultAddress(id){
+  user.addresses = user.addresses.map(a=>({ ...a, isDefault:a.id===id }));
+  saveUser();
+  toast('Default address updated.','success');
+  renderProfile();
+}
+
+function deleteAddress(id){
+  user.addresses = user.addresses.filter(a=>a.id!==id);
+  if(user.addresses.length && !user.addresses.some(a=>a.isDefault)) user.addresses[0].isDefault = true;
+  saveUser();
+  toast('Address removed.','info');
+  renderProfile();
+}
+
+function getProfilePANSection(){
+  return `
+  <div class="profile-section-card">
+    <div class="profile-section-head">
+      <div class="profile-section-title">PAN Card Information</div>
+    </div>
+    <p class="profile-compact-text" style="margin-bottom:1rem;">PAN helps in smoother processing for eligible invoices and tax-compliant orders.</p>
+    <div class="profile-grid-2">
+      <div class="form-group"><label class="form-label">PAN Holder Name</label><input class="form-input" id="pan_name" value="${user.name||''}" placeholder="Name as per PAN"></div>
+      <div class="form-group"><label class="form-label">PAN Number</label><input class="form-input" id="pan_no" value="${user.pan||''}" placeholder="ABCDE1234F"></div>
+    </div>
+    <div class="profile-form-actions">
+      <button class="btn-coral btn-sm" onclick="savePAN()">Save PAN</button>
+    </div>
+  </div>`;
+}
+
+function savePAN(){
+  const panName = document.getElementById('pan_name')?.value.trim() || '';
+  const pan = (document.getElementById('pan_no')?.value || '').trim().toUpperCase();
+  if(pan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)){
+    toast('Invalid PAN format. Use ABCDE1234F.','error');
+    return;
+  }
+  user.name = panName || user.name;
+  user.pan = pan;
+  saveUser();
+  toast('PAN details saved.','success');
+  renderProfile();
+}
+
+function getProfilePaymentSection(){
+  const upiList = user.payments.savedUPI.length
+    ? user.payments.savedUPI.map((u,i)=>`<div class="summary-row"><span>${u}</span><button class="profile-plain-btn" onclick="removeUPI(${i})">Remove</button></div>`).join('')
+    : '<div class="profile-empty">No UPI IDs saved yet.</div>';
+
+  const cardList = user.payments.savedCards.length
+    ? user.payments.savedCards.map((c,i)=>`<div class="summary-row"><span>${c}</span><button class="profile-plain-btn" onclick="removeCard(${i})">Remove</button></div>`).join('')
+    : '<div class="profile-empty">No cards saved yet.</div>';
+
+  return `
+  <div class="profile-stack">
+    <div class="profile-payment-card">
+      <div class="profile-card-head">
+        <div>
+          <div style="font-weight:800;">Gift Card Balance</div>
+          <div class="profile-compact-text">Available for checkout</div>
+        </div>
+        <div class="profile-stat-value" style="color:var(--teal);font-size:1.35rem;">${fmt(user.payments.giftCards||0)}</div>
+      </div>
+    </div>
+
+    <div class="profile-payment-card">
+      <div class="profile-section-head" style="margin-bottom:.6rem;"><div class="profile-section-title" style="font-size:1rem;">Saved UPI</div></div>
+      <div class="profile-list">${upiList}</div>
+      <div style="display:flex;gap:.6rem;margin-top:.8rem;flex-wrap:wrap;">
+        <input class="form-input" id="upi_new" placeholder="example@upi" style="flex:1;min-width:220px;">
+        <button class="btn-teal btn-sm" onclick="addUPI()">Add UPI</button>
+      </div>
+    </div>
+
+    <div class="profile-payment-card">
+      <div class="profile-section-head" style="margin-bottom:.6rem;"><div class="profile-section-title" style="font-size:1rem;">Saved Cards</div></div>
+      <div class="profile-list">${cardList}</div>
+      <div style="display:flex;gap:.6rem;margin-top:.8rem;flex-wrap:wrap;">
+        <input class="form-input" id="card_new" placeholder="Card number" style="flex:1;min-width:220px;">
+        <button class="btn-teal btn-sm" onclick="addCard()">Save Card</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function addUPI(){
+  const upi = (document.getElementById('upi_new')?.value || '').trim().toLowerCase();
+  if(!upi || !upi.includes('@')){ toast('Enter a valid UPI ID.','error'); return; }
+  user.payments.savedUPI.push(upi);
+  saveUser();
+  toast('UPI added.','success');
+  renderProfile();
+}
+
+function removeUPI(i){
+  user.payments.savedUPI.splice(i,1);
+  saveUser();
+  toast('UPI removed.','info');
+  renderProfile();
+}
+
+function addCard(){
+  const raw = (document.getElementById('card_new')?.value || '').replace(/\D/g,'');
+  if(raw.length < 12){ toast('Enter a valid card number.','error'); return; }
+  const masked = '•••• •••• •••• ' + raw.slice(-4);
+  user.payments.savedCards.push(masked);
+  saveUser();
+  toast('Card saved.','success');
+  renderProfile();
+}
+
+function removeCard(i){
+  user.payments.savedCards.splice(i,1);
+  saveUser();
+  toast('Card removed.','info');
+  renderProfile();
+}
+
+function logoutUser(){
+  user = null;
+  localStorage.removeItem('baz_user');
+  document.getElementById('userIcon').textContent='👤';
+  toast('Logged out successfully.','info');
+  goTo('home');
+}
+
+// ══════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════
+function doLogin(){
+  const name=document.getElementById('loginName').value.trim();
+  const email=document.getElementById('loginEmail').value.trim();
+  if(!name||!email){ toast('Please fill in both fields','error'); return; }
+  const previous = user || {};
+  user={...previous,name,email};
+  hydrateUserProfile();
+  saveUser();
+  document.getElementById('userIcon').textContent='👋';
+  toast('Welcome, '+name+'! 🎉','success');
+  goTo('profile');
+}
+
+// ══════════════════════════════════════════
+// CHECKOUT
+// ══════════════════════════════════════════
+function renderCheckout(){
+  if(!user){ goTo('login'); return; }
+  const total=cartTotal();
+  document.getElementById('checkoutContent').innerHTML=`
+  <div>
+    <div class="glass2" style="border-radius:1.2rem;padding:1.5rem;">
+      <div style="font-weight:800;font-family:'Outfit',sans-serif;margin-bottom:1rem;">Delivery Address</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="co_name" value="${user.name||''}" placeholder="Full Name"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="co_phone" placeholder="+91 9XXXXXXXXX"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Address Line</label><input class="form-input" id="co_addr" placeholder="House no, Street, Area"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">City</label><input class="form-input" id="co_city" placeholder="City"></div>
+        <div class="form-group"><label class="form-label">State</label><input class="form-input" id="co_state" placeholder="State"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Pincode</label><input class="form-input" id="co_pin" placeholder="000000"></div>
+        <div class="form-group"><label class="form-label">Country</label><input class="form-input" id="co_country" value="India" placeholder="Country"></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="glass2" style="border-radius:1.2rem;padding:1.5rem;">
+      <div style="font-weight:800;font-family:'Outfit',sans-serif;margin-bottom:1rem;">Order Summary</div>
+      ${cart.map(i=>`<div class="summary-row"><span style="opacity:.7;font-size:.82rem;">${i.name.slice(0,28)}... ×${i.qty}</span><span style="font-size:.85rem;">${fmt((i.lockedPrice||i.price)*i.qty)}</span></div>`).join('')}
+      <div class="divider"></div>
+      <div class="summary-row"><span style="opacity:.7;">Subtotal</span><span>${fmt(Math.round(cartSubtotal()))}</span></div>
+      <div class="summary-row"><span style="opacity:.7;">Shipping</span><span style="color:var(--teal)">${cartShipping()===0?'FREE':fmt(cartShipping())}</span></div>
+      <div class="summary-row"><span style="opacity:.7;">GST (18%)</span><span>${fmt(cartGST())}</span></div>
+      ${spinDiscount?`<div class="summary-row" style="color:var(--teal)"><span>🎰 SpinDeal™ Discount</span><span>Applied</span></div>`:''}
+      <div class="divider"></div>
+      <div class="summary-row"><span class="summary-total">Total</span><span class="summary-total" style="color:var(--coral)">${fmt(total)}</span></div>
+      <button class="btn-coral" style="width:100%;margin-top:1rem;font-size:1rem;" onclick="initiatePayment()">
+        🔒 Pay ${fmt(total)} Securely
+      </button>
+      <p style="text-align:center;font-size:.7rem;opacity:.4;margin-top:.75rem;">Powered by Razorpay · UPI · Cards · NetBanking</p>
+    </div>
+  </div>`;
+}
+
+function initiatePayment(){
+  const name=document.getElementById('co_name')?.value;
+  const phone=document.getElementById('co_phone')?.value;
+  if(!name||!phone){ toast('Please fill in your name and phone number.','error'); return; }
+  const total=cartTotal();
+  const options={
+    key:'rzp_test_YOUR_KEY_HERE',
+    amount:total*100,
+    currency:'INR',
+    name:'Bazario',
+    description:'Your Bazario Order',
+    handler:function(res){
+      const order={
+        id:'BZR-'+Date.now(),
+        items:[...cart],
+        total,
+        paymentId:res.razorpay_payment_id||'PAY-DEMO-'+Date.now(),
+        date:new Date().toLocaleDateString('en-IN'),
+        status:'Confirmed',
+        address:{name,phone}
+      };
+      orders.unshift(order);
+      saveOrders();
+      clearCart();
+      spinDiscount=null;
+      goTo('success');
+      renderSuccess(order);
+    },
+    prefill:{name:user?.name||'',email:user?.email||'',contact:phone},
+    theme:{color:'#ef5b3f'}
+  };
+  try{
+    const rzp=new window.Razorpay(options);
+    rzp.open();
+  } catch(e){
+    // Demo fallback (no real Razorpay key)
+    const order={id:'BZR-'+Date.now(),items:[...cart],total,paymentId:'DEMO-'+Date.now(),date:new Date().toLocaleDateString('en-IN'),status:'Confirmed',address:{name,phone}};
+    orders.unshift(order);saveOrders();clearCart();spinDiscount=null;
+    goTo('success');renderSuccess(order);
+  }
+}
+
+function renderSuccess(order){
+  const hasMystery=order.items.some(i=>i.mysteryBox);
+  document.getElementById('successContent').innerHTML=`
+  <div style="max-width:600px;margin:0 auto;">
+    <div style="font-size:4rem;margin-bottom:.5rem;" id="successEmoji">🎉</div>
+    <h2 class="font-display" style="font-size:2rem;font-weight:900;margin-bottom:.4rem;">Order Confirmed!</h2>
+    <p style="opacity:.6;margin-bottom:.3rem;">${order.id}</p>
+    <p style="opacity:.5;font-size:.85rem;margin-bottom:2rem;">Estimated delivery: 3-5 business days</p>
+    ${hasMystery?`
+    <div class="glass2" style="border-radius:1.5rem;padding:2rem;margin-bottom:2rem;" id="mysteryReveal">
+      <div style="font-size:2rem;margin-bottom:.5rem;">📦</div>
+      <div class="font-display" style="font-size:1.4rem;font-weight:800;margin-bottom:.5rem;">Mystery Box Reveal!</div>
+      <p style="opacity:.6;font-size:.85rem;margin-bottom:1rem;">Your surprise products...</p>
+      <button class="btn-gold" onclick="revealMystery()">✨ REVEAL MY BOX!</button>
+      <div id="revealItems" style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;"></div>
+    </div>`:''}
+    <div class="glass" style="border-radius:1.2rem;padding:1.5rem;margin-bottom:1.5rem;text-align:left;">
+      ${order.items.filter(i=>!i.mysteryBox).map(i=>`<div class="summary-row"><span style="font-size:.85rem;opacity:.7;">${i.name.slice(0,35)}... ×${i.qty}</span><span>${fmt((i.lockedPrice||i.price)*i.qty)}</span></div>`).join('')}
+      <div class="divider"></div>
+      <div class="summary-row"><span class="summary-total">Total Paid</span><span class="summary-total" style="color:var(--coral)">${fmt(order.total)}</span></div>
+    </div>
+    <div style="display:flex;gap:1rem;justify-content:center;">
+      <button class="btn-coral" onclick="goTo('products')">Continue Shopping</button>
+      <button class="btn-outline" onclick="goTo('orders')">View Orders</button>
+    </div>
+  </div>`;
+}
+
+function revealMystery(){
+  const btn=document.querySelector('#mysteryReveal button');
+  if(btn) btn.style.display='none';
+  const revEl=document.getElementById('revealItems');
+  const mysteryItem=orders[0]?.items.find(i=>i.mysteryBox);
+  const reveals=mysteryItem?.mysteryReveal||[];
+  revEl.style.display='flex';
+  reveals.forEach((p,i)=>{
+    setTimeout(()=>{
+      revEl.innerHTML+=`<div class="anim-fade glass" style="border-radius:1rem;padding:.75rem;text-align:center;width:120px;">
+        <img src="${p.img}" style="width:80px;height:80px;border-radius:.75rem;object-fit:cover;margin-bottom:.4rem;">
+        <div style="font-size:.68rem;font-weight:600;opacity:.8;">${p.name.slice(0,25)}...</div>
+        <div style="font-size:.75rem;color:var(--gold);font-weight:800;">${fmt(p.price)}</div>
+      </div>`;
+    },i*600);
+  });
+  toast('🎁 Your mystery items are revealed!','success');
+}
+
+// ══════════════════════════════════════════
+// VOICE SHOP
+// ══════════════════════════════════════════
+function toggleVoice(){
+  const btn=document.getElementById('voiceBtn');
+  if(voiceOn){ stopVoice(); btn.classList.remove('listening'); voiceOn=false; return; }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ toast('VoiceShop™ requires Chrome or Edge browser.','error'); return; }
+  recognition=new SR();
+  recognition.lang='en-IN';
+  recognition.continuous=false;
+  recognition.onresult=e=>{
+    const text=e.results[0][0].transcript.toLowerCase();
+    handleVoiceCommand(text);
+  };
+  recognition.onend=()=>{ btn.classList.remove('listening'); voiceOn=false; };
+  recognition.start();
+  btn.classList.add('listening');
+  voiceOn=true;
+  toast('🎙️ VoiceShop™ listening... Say "search for headphones" or "open cart"','info');
+}
+
+function stopVoice(){ if(recognition) recognition.stop(); }
+
+function handleVoiceCommand(text){
+  toast('🎙️ Heard: "'+text+'"','info');
+  if(text.includes('search for')||text.includes('search')){ const q=text.replace(/search for|search/gi,'').trim(); document.getElementById('searchInput').value=q; goTo('products'); renderProducts(q); }
+  else if(text.includes('open cart')||text.includes('my cart')) goTo('cart');
+  else if(text.includes('go home')||text.includes('home')) goTo('home');
+  else if(text.includes('mystery')) goTo('mystery');
+  else if(text.includes('group')) goTo('groupbuy');
+  else if(text.includes('orders')||text.includes('order history')) goTo('orders');
+  else if(text.includes('electronics')) { filterCat('Electronics',document.querySelector('.cat-item')); goTo('products'); }
+  else if(text.includes('checkout')) goTo('checkout');
+  else toast('🎙️ Command not recognized. Try "search for shoes" or "open cart"','error');
+}
+
+// ══════════════════════════════════════════
+// SOCIAL CART CHECK ON LOAD
+// ══════════════════════════════════════════
+function checkSocialCart(){
+  const params=new URLSearchParams(window.location.search);
+  const sc=params.get('socialcart');
+  if(sc){
+    try{
+      const items=JSON.parse(decodeURIComponent(atob(sc)));
+      openModal(`<div>
+        <div style="font-size:1.8rem;text-align:center;margin-bottom:.5rem;">🔗</div>
+        <div class="font-display" style="font-weight:800;font-size:1.2rem;text-align:center;margin-bottom:.3rem;">SocialCart™ — Friend's Wishlist</div>
+        <p style="text-align:center;font-size:.82rem;opacity:.6;margin-bottom:1.2rem;">Vote on what they should buy!</p>
+        ${items.map(i=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem;border-radius:.75rem;background:var(--glass);margin-bottom:.5rem;">
+          <img src="${i.img}" style="width:48px;height:48px;border-radius:.5rem;object-fit:cover;">
+          <div style="flex:1;"><div style="font-size:.82rem;font-weight:600;">${i.name.slice(0,35)}</div><div style="font-size:.78rem;opacity:.5;">${fmt(i.price)} × ${i.qty}</div></div>
+          <div style="display:flex;gap:.4rem;">
+            <button onclick="this.style.color='var(--teal)';this.textContent='👍✓'" style="background:var(--teal2);border:1px solid rgba(52,211,153,.3);color:var(--teal);border-radius:50px;padding:.3rem .7rem;cursor:pointer;font-weight:700;">👍</button>
+            <button onclick="this.style.color='var(--coral)';this.textContent='👎✓'" style="background:var(--coral3);border:1px solid rgba(239,91,63,.3);color:var(--coral);border-radius:50px;padding:.3rem .7rem;cursor:pointer;font-weight:700;">👎</button>
+          </div>
+        </div>`).join('')}
+      </div>`);
+    }catch(e){}
+  }
+}
+
+// ══════════════════════════════════════════
+// USER ICON UPDATE
+// ══════════════════════════════════════════
+if(user){
+  hydrateUserProfile();
+  saveUser();
+  document.getElementById('userIcon').textContent='👋';
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+renderHome();
+checkSocialCart();
+</script>
+</body>
+</html>
